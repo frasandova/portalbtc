@@ -1,0 +1,61 @@
+﻿@model WebBiotec.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Registrarse";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+}
+
+
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <h4>Cree nuevo usuario KAM</h4>
+    <hr />
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name, new { @class = "col-md-2 control-label" })
+        <div class="col-md-4">
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        </div>
+    </div>
+    @*@Html.ValidationSummary("", new { @class = "text-danger" })*@
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+        <div class="col-md-4">
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+        <div class="col-md-4">
+            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
+        <div class="col-md-4">
+            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Canal</label>
+        <div class="col-md-4">
+            @Html.DropDownList("CANALES_USUARIOS", (IEnumerable<SelectListItem>)ViewBag.CanalesUsuarios, new { @class = "k-input form-control" })
+            @*@Html.ValidationMessageFor(model => model.CANALES_USUARIOS, "", new { @class = "text-danger" })*@
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <a href="@Url.Action("Index", "AspNetUsers")" class="btn btn-default">Volver</a>
+            <input type="submit" class="btn btn-default" value="Crear" />
+        </div>
+    </div>
+
+
+}
+
+@*@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}*@

@@ -1,0 +1,130 @@
+﻿@model IEnumerable<WebBiotec.Models.AspNetUsers>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="clearfix"></div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+
+                    <h2>MANTENEDOR DE USUARIOS<small></small></h2>
+
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>   
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                        <p>
+                            <a href="@Url.Action("Register", "Account")">Crear Nuevo Usuario</a>
+                        </p>
+                        <div class="table-responsive_content">
+                            <div class="table-responsive">
+                                <table id="datatable_Usuarios" class="table table-striped jambo_table bulk_action">
+                                    <thead>
+                                        <tr class="headings">
+                                            <th class="column-title" style="text-align:left">USUARIO</th>
+                                            <th class="column-title" style="text-align:left">EMAIL</th>
+                                        <th class="column-title"></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                            <tr class="even pointer">
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.UserName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Email)
+                                                </td>
+                                                <td style="text-align:right">
+                                                    @Html.ActionLink("Editar", "Edit", new { id = item.Id, email = item.Email }) |
+                                                    @*@Html.ActionLink("Details", "Details", new { id = item.Id }) |*@
+                                                    @Html.ActionLink("Eliminar", "Delete", new { id = item.Id, email = item.Email })
+                                                </td>
+                                            </tr>
+                                            }
+                                            @*@foreach (var item in detallesDocumentos)
+                                                {
+                                                    <tr class="even pointer">
+                                                        <td class="text-left">@item.FICHA</td>
+                                                        <td class="text-left">@item.N_FACTURA</td>
+                                                        <td class="text-left">@item.FECHA_GASTO</td>
+                                                        <td class="text-left">@item.FECHA_EMISION</td>
+                                                        <td class="text-left">@item.MES_GASTO_NUEVO</td>
+                                                        <td class="text-right">@item.MONTO.ToString("N0")</td>
+                                                        <td class="text-left">@item.CUENTA</td>
+                                                        <td class="text-left">@item.CUENTA_NUEVA</td>
+                                                        <td class="text-left">@item.ESTADO</td>
+                                                        <td class="text-left">@item.COMENTARIO</td>
+
+                                                        <td>
+                                                            @if (@item.ESTADO != "PENDIENTE")
+                                                            {
+                                                                <a href="~/MantenedorFacturas/DeleteEstadoFactura?RUT=@item.RUT&N_FACTURA=@item.N_FACTURA&FECHA_EMISION=@item.FECHA_EMISION&FECHA_GASTO=@item.FECHA_GASTO&monthpicker=@Request.Params["monthpicker"]&monthpickerfin=@Request.Params["monthpickerfin"]&comboboxCanales=@Request.Params["comboboxCanales"]&comboboxClientes=@Request.Params["comboboxClientes"]">Eliminar</a>
+                                                            }
+                                                        </td>
+                                                        <td><a onClick="VerFactura('@item.CARPETA.Substring(0,4)', '@item.CARPETA', '@item.RUT', '@item.N_FACTURA')"><i class="fa fa-file"></i></a></td>
+
+                                                    </tr>
+                                                }*@
+
+</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+@*<h2>MANTENEDOR DE USUARIOS</h2>*@
+@*<p>
+    <a href="@Url.Action("Register", "Account")">Crear Nuevo Usuario</a>
+</p>
+<table class="table">
+    <tr>
+        <th>
+            Usuario
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Email)
+        </th>
+
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Email)
+        </td>
+ 
+
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+        </td>
+    </tr>
+}
+
+</table>*@

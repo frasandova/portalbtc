@@ -1,0 +1,41 @@
+﻿@model WebBiotec.Models.AspNetUsers
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+}
+
+@*<h2>Eliminar Usuario</h2>*@
+
+<h3>Esta seguro de eliminar este usuario?</h3>
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @*@Html.DisplayNameFor(model => model.UserName)*@
+            USUARIO
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UserName)
+        </dd>
+        <dt>
+            @*@Html.DisplayNameFor(model => model.Email)*@
+            EMAIL
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>    
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <a href="@Url.Action("Index", "AspNetUsers")" class="btn btn-default">Volver</a>
+            <input type="submit" value="Eliminar" class="btn btn-default" />
+        </div>
+    }
+</div>

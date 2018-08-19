@@ -1,0 +1,942 @@
+﻿
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+
+    //var clientes = WebBiotec.Models.DAO.DaoControlPresupuesto.getClientes();
+}
+
+@*@Styles.Render("~/Content/AmchartCs")*@
+
+<style>
+
+       #chartdivVentasMM, #chartdivRelacionProvision, #chartdivPresupuestoEjecucion {
+        width: 100%;
+        height: 300px;
+        background-color:rgb(255, 255, 255);
+        overflow: visible;
+        text-align: left;
+         }
+
+       #chartdivRelacionProvision {
+        width: 100%;
+        height: 400px;
+        background-color:rgb(255, 255, 255);
+        overflow: visible;
+        text-align: left;
+    }
+
+
+
+</style>
+
+
+<div class="row x_title">
+    <div class="col-md-6">
+        <h3>CONTROL PRESUPUESTO TRADE MARKETING (CPTM)<small></small></h3>
+    </div>
+
+</div>
+
+
+<div class="panel-group" id="accordion" style="padding-top:10px; padding-bottom:10px;">
+    <div class="panel" style="background-color:#003140;">
+        <div class="panel-heading" style="color:#ffffff;background-color:#3e4855;margin:0px !important">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="">Filtros</a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+
+                <form class="form-horizontal bordered-row">
+
+                    <div class="row">
+  
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label pull-left" style="color:#ffffff;">Clientes:</label>
+                                <div class="col-sm-8 pull-right">
+                                    <input id="comboboxClientes" title="Clientes" value="Seleccionar" style="width: 100%" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label pull-left" style="color:#ffffff;">Fecha:</label>
+                                <div class="col-sm-8 pull-right">
+                                    <input id="monthpicker" title="Fecha" style="width: 100%" />                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="form-horizontal bordered-row pull-right">
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <button type="button" class="btn btn-default" id="linkResultadosLocales" onclick="Filtrar();" style="margin-bottom:20px">Filtrar</button>
+                                    <button type="button" class="btn btn-default" id="linkLimpiar" onclick="Limpiar();" style="margin-bottom:20px; margin-right:10px">Limpiar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                       
+                    </div>
+            
+                </form>
+
+                @*<div class="form-horizontal bordered-row pull-right">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <button type="button" class="btn btn-default" id="linkResultadosLocales" onclick="Filtrar();" style="margin-bottom:20px">Filtrar</button>
+                        <button type="button" class="btn btn-default" id="linkLimpiar" onclick="Limpiar();" style="margin-bottom:20px; margin-right:10px">Limpiar</button>
+                        
+
+                    </div>
+                </div>*@
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Sección Ventas MM*@
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+
+<div class="row x_title">
+    <div class="col-md-6">
+        <h3>I VENTAS</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-4 col-md-4 col-xs-12 ">        
+        <div class="clearfix"></div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Totales <small></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Monto</th>
+                                <th>%</th>                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                @*<th scope="row">1</th>*@
+                                <td>Total Acumulado</td>
+                                <td>0</td>
+                                <td>0%</td>
+                            </tr>
+                            <tr>
+                                @*<th scope="row">2</th>*@
+                                <td>Total del Mes</td>                                
+                                <td>0</td>
+                                <td>0%</td>
+                            </tr>
+                            <tr>
+                                @*<th scope="row">3</th>*@
+                                <td>Total</td>
+                                <td>0</td>
+                                <td>0%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-lg-8 col-md-8 col-xs-12">        
+        <div class="clearfix"></div>
+       
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Ventas (mm) <small></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div id="chartdivVentasMM"></div>
+
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+
+
+@*PRESUPUESTO GASTOS TRADE MARKETING*@
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+<div class="row x_title">
+    <div class="col-md-6">
+        <h3>II PRESUPUESTO GASTOS TRADE MARKETING</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-4 col-md-4 col-xs-12 ">
+        <div class="clearfix"></div>       
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>RESUMEN MENSUAL <small></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Acumulado al mes</th>
+                                <th>Mes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>                                
+                                <td>Gastos Presupuestados</td>
+                                <td>157,322,929</td>
+                                <td>35,534,549</td>
+                            </tr>
+                            <tr>                                
+                                <td>Gastos Provisionados</td>
+                                <td>0</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>Gastos Facturados</td>
+                                <td>0</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>                                
+                                <td>Presupuesto Disponible (*)</td>
+                                <td>0</td>
+                                <td>0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <p>
+                            (*) Corresponde al monto de gastos presupuestados, menos el monto indicado por las facturas de publicidad recibidas a la fecha del informe. Para determinar la exactitud del presupuesto disponible se deben considerar las facturas de publicidad que se encuentren en proceso de emision y los gastos ya comprometidos con el cliente.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+    </div>
+    <div class="col-lg-8 col-md-8 col-xs-12">
+        <div class="clearfix"></div>
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Relacion Provision v/s Gasto Real (Mes)<small></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div id="chartdivRelacionProvision"></div>
+
+                </div>
+            </div>
+        </div>
+    
+    </div>
+</div>
+
+<div class="row x_title">
+    <div class="col-md-6">
+        <h3>DETALLE POR CUENTA</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-7 col-md-7 col-xs-12">
+        <div class="clearfix"></div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>ACUMULADO AL MES DE DICIEMBRE<small></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="table-responsive">
+                        <table class="table table-striped jambo_table bulk_action">
+                                <thead>
+                                    <tr class="headings">
+                                        <th class="column-title">Actividad Promocional</th>
+                                        <th class="column-title">Presupuesto Sobre Ventas</th>
+                                        <th class="column-title">Gasto Presup.</th>
+                                        <th class="column-title">Prov Contable.</th>
+                                        <th class="column-title">Gtos Facturado</th>
+                                        <th class="column-title">Monto Disponible</th>
+                                        <th class="column-title">%</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr class="even pointer">
+                                        <td>Rappel / Aporte Fijo</td>
+                                        <td>10%</td>
+                                        <td>9,151,241</td>
+                                        <td>9,151,242</td>
+                                        <td>5,176,700</td>
+                                        <td>3,974,542</td>
+                                        <td>43%</td>
+                                    </tr>
+                                    <tr class="odd pointer">
+                                        <td>Aportes Extras</td>
+                                        <td>20%</td>
+                                        <td>9,151,241</td>
+                                        <td>9,151,242</td>
+                                        <td>5,176,700</td>
+                                        <td>3,974,542</td>
+                                        <td>53%</td>
+                                    </tr>
+                                    <tr class="even pointer">
+                                        <td>Descuentos Promocionales</td>
+                                        <td>20%</td>
+                                        <td>9,151,241</td>
+                                        <td>9,151,242</td>
+                                        <td>5,176,700</td>
+                                        <td>3,974,542</td>
+                                        <td>63%</td>
+                                    </tr>
+                                    <tr class="odd pointer">
+                                        <td>Premios por Ventas</td>
+                                        <td>30%</td>
+                                        <td>9,151,241</td>
+                                        <td>9,151,242</td>
+                                        <td>5,176,700</td>
+                                        <td>3,974,542</td>
+                                        <td>73%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+</div>
+    <div class="col-lg-5 col-md-5 col-xs-12">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Presupuesto v/s Ejecución de Gasto<small></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div id="chartdivPresupuestoEjecucion"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>   
+  
+
+
+@*DETALLE POR DOCUMENTO*@
+
+
+
+
+<div class="row x_title">
+    <div class="col-lg-12 col-md-12 col-xs-12">
+    </div>
+    <div class="panel-group" id="accordion" style="padding-top:10px; padding-bottom:10px;">
+        <div class="panel" style="background-color:#003140;">
+            <div class="panel-heading" style="color:#ffffff;background-color:#3e4855;margin:0px !important">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="">DETALLE POR DOCUMENTO</a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <form class="form-horizontal bordered-row">
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label pull-left" style="color:#ffffff;">N° DOCUMENTO:</label>
+                                    <div class="col-sm-8 pull-right">
+                                        <input id="comboboxNumeroDocumento" title="Clientes" value="Seleccionar" style="width: 100%" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <div class="form-horizontal bordered-row pull-right">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <button type="button" class="btn btn-default" id="linkResultadosLocales" onclick="Filtrar();" style="margin-bottom:20px">Filtrar</button>
+                                        <button type="button" class="btn btn-default" id="linkLimpiar" onclick="Limpiar();" style="margin-bottom:20px; margin-right:10px">Limpiar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="clearfix"></div>
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                @*<div class="x_title">
+                    <h2><small></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>*@
+                <div class="x_content">
+                    <div class="table-responsive">
+                        <table class="table table-striped jambo_table bulk_action">
+                            <thead>
+                                <tr class="headings">
+                                    <th class="column-title">Documento</th>
+                                    <th class="column-title">Número</th>
+                                    <th class="column-title">Fecha</th>
+                                    <th class="column-title">Monto Bruto.</th>
+                                    <th class="column-title">IVA</th>
+                                    <th class="column-title">Monto Neto</th>
+                                    <th class="column-title">Actividad Promocional</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="even pointer">
+                                    <td>Factura</td>
+                                    <td>6179310</td>
+                                    <td>31/12/2017</td>
+                                    <td>57,589</td>
+                                    <td>9,195</td>
+                                    <td>48,394</td>
+                                    <td>FE/6179310 CENCOSUD</td>
+                                </tr>
+                                <tr class="odd pointer">
+                                    <td>Factura</td>
+                                    <td>6179310</td>
+                                    <td>31/12/2017</td>
+                                    <td>57,589</td>
+                                    <td>9,195</td>
+                                    <td>48,394</td>
+                                    <td>FE/6179310 CENCOSUD</td>
+                                </tr>
+                                <tr class="even pointer">
+                                    <td>Factura</td>
+                                    <td>6179310</td>
+                                    <td>31/12/2017</td>
+                                    <td>57,589</td>
+                                    <td>9,195</td>
+                                    <td>48,394</td>
+                                    <td>FE/6179310 CENCOSUD</td>
+                                </tr>
+                                <tr class="odd pointer">
+                                    <td>Factura</td>
+                                    <td>6179310</td>
+                                    <td>31/12/2017</td>
+                                    <td>57,589</td>
+                                    <td>9,195</td>
+                                    <td>48,394</td>
+                                    <td>FE/6179310 CENCOSUD</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>  
+
+
+
+
+
+
+
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+
+<script>
+
+    $(document).ready(function () {
+
+        kendo.culture("es-CL");
+        // create DatePicker from input HTML element
+        $("#datepicker").kendoDatePicker();
+
+        $("#monthpicker").kendoDatePicker({
+            // defines the start view
+            start: "year",
+
+            // defines when the calendar should return date
+            depth: "year",
+
+            // display month and year in the input
+            //format: "MMMM yyyy",
+            format: "MM-yyyy",
+            maxDate: '0',
+
+            // specifies that DateInput is used for masking the input element
+            dateInput: true,
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+
+        });
+
+        var clientesDS = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: '@Url.Action("cargarClientes", "PortalWeb")',
+                    dataType: "json",
+                    //data: {
+                    //    cod: "ZONASLOCALES",
+                    //    idcanal: canal,
+                    //    idzona: zona,
+                    //    idregion: region,
+                    //    iddistribuidor: distribuidor
+                    //}
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        valor: { type: "string" },
+                        texto: { type: "string" }
+                    }
+                }
+            }
+        });
+
+        $("#comboboxClientes").kendoComboBox({
+            //placeholder: "Todos",
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            dataSource: clientesDS,
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth();
+        var yyyy = today.getFullYear();
+
+        var sumaMes = 1;
+        var fechaActual;
+
+        if (mm == 12) {
+            fechaActual = 1 + '-' + yyyy;
+        }
+        else {
+            fechaActual = mm + 1 + '-' + yyyy;
+        }
+        
+        $("#monthpicker").data('kendoDatePicker').value(fechaActual);
+        //$("#monthpicker").data('kendoDatePicker').value('09-2017');
+
+        var documentosDS = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: '@Url.Action("cargarClientes", "PortalWeb")',
+                    dataType: "json",
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        valor: { type: "string" },
+                        texto: { type: "string" }
+                    }
+                }
+            }
+        });
+
+        $("#comboboxNumeroDocumento").kendoComboBox({
+            //placeholder: "Todos",
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            dataSource: documentosDS,
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+    });
+
+</script>
+
+<!-- Gráfico Ventas -->
+<script>
+    var chart = AmCharts.makeChart("chartdivVentasMM", {
+    "theme": "light",
+    "type": "serial",
+    "categoryField": "date",
+    "dataDateFormat": "YYYY-MM",
+	"startDuration": 2,
+    "dataProvider": [{
+        "date": "2018-01",
+        "visits": 4025,
+    }, {
+        "date": "2018-02",
+        "visits": 1882,
+    }, {
+        "date": "2018-03",
+        "visits": 1809,
+    }, {
+        "date": "2018-04",
+        "visits": 1322,
+    }, {
+        "date": "2018-05",
+        "visits": 1122,
+    }, {
+        "date": "2018-06",
+        "visits": 1114,
+    }, {
+        "date": "2018-07",
+        "visits": 984,
+    }, {
+        "date": "2018-08",
+        "visits": 711,
+    }, {
+        "date": "2018-09",
+        "visits": 665,
+    }, {
+        "date": "2018-10",
+        "visits": 580,
+    }, {
+        "date": "2018-11",
+        "visits": 443,
+    }, {
+        "date": "2018-12",
+        "visits": 441,
+    }
+    ],
+    "valueAxes": [{
+        "position": "left",
+        //"title": "VENTAS MM"
+    }],
+    "graphs": [{
+        "balloonText": "[[category]]: <b>[[value]]</b>",
+        "fillColorsField": "color",
+        "fillAlphas": 1,
+        "lineAlpha": 0.1,
+        "type": "column",
+        "valueField": "visits"
+    }],
+    "depth3D": 20,
+	"angle": 30,
+    "chartCursor": {
+        "categoryBalloonEnabled": false,
+        "cursorAlpha": 0,
+        "zoomable": false
+    },
+    "categoryField": "date",
+    "categoryAxis": {
+        "gridPosition": "start",
+        "labelRotation": 0
+    },
+    "export": {
+    	"enabled": true
+     }
+
+});
+</script>
+
+<!-- Gráfico Relación Provision v/s Gasto Real (Mes -->
+@*chartdivRelacionProvision*@
+<!-- amCharts javascript code -->
+<script type="text/javascript">
+    AmCharts.makeChart("chartdivRelacionProvision",
+				{
+					"type": "serial",
+					"categoryField": "category",
+					"colors": [
+						"#69B4DB",
+						"#D5DBDB",
+						"#B0DE09",
+						"#0D8ECF",
+						"#2A0CD0",
+						"#CD0D74",
+						"#CC0000",
+						"#00CC00",
+						"#0000CC",
+						"#DDDDDD",
+						"#999999",
+						"#333333",
+						"#990000"
+					],
+					"startDuration": 1,
+					"categoryAxis": {
+						"gridPosition": "start"
+					},
+					"trendLines": [],
+					"graphs": [
+						{
+							"balloonText": "[[title]] of [[category]]:[[value]]",
+							"fillAlphas": 1,
+							"id": "AmGraph-1",
+							"title": "Provision",
+							"type": "column",
+							"valueField": "column-1"
+						},
+						{
+							"balloonText": "[[title]] of [[category]]:[[value]]",
+							"fillAlphas": 1,
+							"id": "AmGraph-2",
+							"title": "Gasto real",
+							"type": "column",
+							"valueField": "column-2"
+						}
+					],
+					"guides": [],
+					"valueAxes": [
+						{
+							"id": "ValueAxis-1",
+							//"title": "Axis title"
+						}
+					],
+					"allLabels": [],
+					"balloon": {},
+					"legend": {
+						"enabled": true,
+						"useGraphSettings": true
+					},
+					"titles": [
+						{
+							"id": "Title-1",
+							"size": 15,
+							"text": ""
+						}
+					],
+					"dataProvider": [
+						{
+							"category": "2018-01",
+							"column-1": 8,
+							"column-2": 5
+						},
+						{
+							"category": "2018-02",
+							"column-1": 6,
+							"column-2": 7
+						},
+						{
+							"category": "2018-03",
+							"column-1": 2,
+							"column-2": 3
+						},
+						{
+						    "category": "2018-04",
+						    "column-1": 8,
+						    "column-2": 20
+						},
+						{
+						    "category": "2018-05",
+						    "column-1": 2,
+						    "column-2": 3
+						}
+                        ,
+						{
+						    "category": "2018-06",
+						    "column-1": 2,
+						    "column-2": 3
+						}
+                        ,
+						{
+						    "category": "2018-07",
+						    "column-1": 2,
+						    "column-2": 3
+						}
+                        ,
+						{
+						    "category": "2018-08",
+						    "column-1": 2,
+						    "column-2": 3
+						}
+                        ,
+						{
+						    "category": "2018-09",
+						    "column-1": 2,
+						    "column-2": 3
+						},
+						{
+						    "category": "2018-10",
+						    "column-1": 2,
+						    "column-2": 3
+						},
+						{
+						    "category": "2018-11",
+						    "column-1": 2,
+						    "column-2": 3
+						},
+						{
+						    "category": "2018-12",
+						    "column-1": 2,
+						    "column-2": 3
+						}
+
+					]
+				}
+			);
+</script>
+
+<!-- Gráfico Presupuesto vs ejecución de gasto -->
+<script type="text/javascript">
+    AmCharts.makeChart("chartdivPresupuestoEjecucion",
+				{
+					"type": "serial",
+					"categoryField": "category",
+					"columnSpacing": 8,
+					"dataDateFormat": "",
+					"rotate": true,
+					"angle": 30,
+					"depth3D": 30,
+					"colors": [
+						"#298A08",
+						"#FFFF00",
+						"#B0DE09",
+						"#0D8ECF",
+						"#2A0CD0",
+						"#CD0D74",
+						"#CC0000",
+						"#00CC00",
+						"#0000CC",
+						"#DDDDDD",
+						"#999999",
+						"#333333",
+						"#990000"
+					],
+					"startDuration": 1,
+					"categoryAxis": {
+						"gridPosition": "start"
+					},
+					"trendLines": [],
+					"graphs": [
+						{
+							"balloonText": "[[title]] of [[category]]:[[value]]",
+							"fillAlphas": 1,
+							"id": "AmGraph-1",
+							"title": "Monto Disponible",
+							"type": "column",
+							"valueField": "column-1"
+						},
+						{
+							"balloonText": "[[title]] of [[category]]:[[value]]",
+							"fillAlphas": 1,
+							"id": "AmGraph-2",
+							"title": "Gtos Facturados",
+							"type": "column",
+							"valueField": "column-2"
+						}
+					],
+					"guides": [],
+					"valueAxes": [
+						{
+							"id": "ValueAxis-1",
+							"stackType": "regular",
+							"title": ""
+						}
+					],
+					"allLabels": [],
+					"balloon": {},
+					"legend": {
+						"enabled": true,
+						"useGraphSettings": true
+					},
+					"titles": [
+						{
+							"id": "Title-1",
+							"size": 15,
+							"text": ""
+						}
+					],
+					"dataProvider": [
+						{
+						    "category": "Rappel / Aporte Fijo",
+							"column-1": 8,
+							"column-2": 5
+						},
+						{
+						    "category": "Aportes Extras",
+							"column-1": 6,
+							"column-2": 7
+						},
+						{
+						    "category": "Descuentos Promocionales",
+							"column-1": 2,
+							"column-2": 3
+						}
+					]
+				}
+			);
+</script>
+
+

@@ -1,0 +1,237 @@
+﻿@model IEnumerable<WebBiotec.Models.Config_ConceptosRetail>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+
+    ViewBag.fechafin = WebBiotec.Models.DAO.DaoControlPresupuesto.CargarUltimaFecha();
+
+    string fecha = WebBiotec.Models.DAO.DaoControlPresupuesto.CargarUltimaFecha();
+    ViewBag.fecha = fecha.Substring(0, 4) + "01";
+
+
+
+    //Request.Params["monthpicker"] = fecha;
+    List<WebBiotec.Models.DTO.detallesDocumentosAdmin> detallesDocumentos = WebBiotec.Models.DAO.DaoControlDocumento.getFacturasEstados(@Request.Params["comboboxCanales"], @Request.Params["comboboxClientes"], @Request.Params["monthpicker"], @Request.Params["monthpickerfin"]);
+
+    var user = User.Identity.Name.ToString().ToLower();
+    var canales = WebBiotec.Models.DAO.DaoControlPresupuesto.getCanales(user);
+    var cadenasClientes = WebBiotec.Models.DAO.DaoControlPresupuesto.GetCadenasClientes(@Request.Params["comboboxCanales"], user);
+}
+
+<div class="panel-group" id="accordion" style="padding-top:10px; padding-bottom:10px;">
+    <div class="panel" style="background-color:#003140;">
+        <div class="panel-heading" style="color:#ffffff;background-color:#3e4855;margin:0px !important">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="">Filtros</a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+
+                <form class="form-horizontal bordered-row" method="get">
+
+                    @*<div class="row">
+
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <label class="control-label" style="color:#ffffff;">FECHA INICIO:</label>
+                            </div>
+                            <div class="col-lg-8 col-md-8 col-sm-12">
+                                <input id="monthpicker" name="monthpicker" title="Fecha Inicio" style="width: 100%" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <label class="control-label" style="color:#ffffff;">FECHA FIN:</label>
+                            </div>
+                            <div class="col-lg-8 col-md-8 col-sm-12">
+                                <input id="monthpickerfin" name="monthpickerfin" title="Fecha Fin" style="width: 100%" />
+                            </div>
+                        </div>
+
+                    </div>*@
+
+                    <div class="row" style="padding-top:10px">
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-3 col-md-3 col-sm-12">
+                                <label class="control-label" style="color:#ffffff;">CANALES:</label>
+                            </div>
+                            <div class="col-lg-9 col-md-9 col-sm-12 pull-left">
+                                <select class="form-control" name="comboboxCanales" id="comboboxCanales" style="width: 100%;margin:auto">
+                                    <option value="0">SELECCIONAR</option>
+                                    @foreach (var items in canales)
+                                    {
+                                        <option value="@items.valor">@items.texto</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12">
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <label class="pull-left control-label" style="color:#ffffff;">CADENAS Y CLIENTES:</label>
+                            </div>
+                            <div class="col-lg-7 col-md-7 col-sm-12 pull-left">
+                                <select class="form-control" name="comboboxClientes" id="comboboxClientes" style="width: 100%;margin:auto">
+                                    <option value="0">SELECCIONAR</option>
+                                    @foreach (var items in cadenasClientes)
+                                    {
+                                        <option value="@items.valor">@items.texto</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="padding-top:10px">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            <div class="form-horizontal bordered-row pull-right">
+                                <div class="col-lg-12 col-md-12 col-sm-12">                                 
+                                    <input type="submit" class="btn btn-default" id="filtrar" name="filtrar" value="Filtrar">   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+<h2>MANTENEDOR DE CUENTAS CONTABLES</h2>
+<p>
+    @*@Html.ActionLink("Crear Nueva Cuenta", "Create")*@
+    @Html.ActionLink("Crear Nueva Cuenta", "Create", new {comboboxCanales = @Request.Params["comboboxCanales"], comboboxClientes = @Request.Params["comboboxClientes"] })
+</p>
+
+<div class="table-responsive">
+    <table id="datatable_CuentasContables" class="table table-striped jambo_table bulk_action">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.RUT)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FICHA)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.COD_CONCEPTO)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CONCEPTO)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.COD_CUENTA)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PORCENTAJE)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TIPO_CALCULO)
+                </th>
+                <th></th>
+            </tr>
+         </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="even pointer">
+                    <td>
+                        @Html.DisplayFor(modelItem => item.RUT)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FICHA)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.COD_CONCEPTO)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CONCEPTO)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.COD_CUENTA)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PORCENTAJE)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TIPO_CALCULO)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Editar", "Edit", new { id = item.ID, comboboxCanales = @Request.Params["comboboxCanales"], comboboxClientes = @Request.Params["comboboxClientes"] }) |
+                        @Html.ActionLink("Eliminar", "Delete", new { id = item.ID, comboboxCanales = @Request.Params["comboboxCanales"], comboboxClientes = @Request.Params["comboboxClientes"] })
+                        @*@Html.ActionLink("Eliminar", "Delete", new { id = item.ID })*@
+                    </td>
+                </tr>
+            }
+        </tbody>
+</table>
+
+</div>
+
+
+
+  
+    
+     <script>
+        $("#comboboxClientes").kendoComboBox({
+            //placeholder: "Seleccionar",
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            //dataSource: dataComboboxClientes,
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+        $("#comboboxCanales").kendoComboBox({
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+        $("#comboboxCanales").change(function () {
+            var valor = $(this).val();
+            MakeLoadClientes(valor, '@user', 'SELECCIONAR');
+        });
+
+         $(document).ready(function () {
+
+             var val_canales = '@Request.Params["comboboxCanales"]';
+             var val_clientes = '@Request.Params["comboboxClientes"]';
+
+             @*if ('@Request.Params["comboboxCanales"]' != null) {
+                 alert('1');
+             } else {
+                 alert('2');
+             }*@
+
+             if (val_canales == "") {
+                 val_canales = "0";
+             }
+
+             if (val_clientes == "") {
+                 val_clientes = "0";
+             }
+
+
+             $("#comboboxCanales").data('kendoComboBox').value(val_canales);
+             $("#comboboxClientes").data('kendoComboBox').value(val_clientes);
+
+         });
+
+
+    </script>

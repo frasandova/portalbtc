@@ -1,0 +1,79 @@
+﻿@model WebBiotec.Models.Config_ConceptosRetail
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+}
+
+<h3>Estas seguro de eliminar este registro?</h3>
+<div>
+    @*<h4>Config_ConceptosRetail</h4>*@
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.RUT)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.RUT)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FICHA)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FICHA)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.COD_CONCEPTO)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.COD_CONCEPTO)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CONCEPTO)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CONCEPTO)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.COD_CUENTA)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.COD_CUENTA)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PORCENTAJE)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PORCENTAJE)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TIPO_CALCULO)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TIPO_CALCULO)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Elimnar" class="btn btn-default" />
+            @Html.ActionLink("Volver", "Index", new { comboboxCanales = @Request.Params["comboboxCanales"], comboboxClientes = @Request.Params["comboboxClientes"] })
+        </div>
+    }
+</div>

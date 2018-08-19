@@ -1,0 +1,1447 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+
+    ViewBag.fecha = WebBiotec.Models.DAO.DaoControlPresupuesto.CargarUltimaFecha();
+    //Request.Params["monthpicker"] = fecha;
+
+    var user = User.Identity.Name.ToString().ToLower();
+    var canales = WebBiotec.Models.DAO.DaoControlPresupuesto.getCanales(user);
+    var cadenasClientes = WebBiotec.Models.DAO.DaoControlPresupuesto.GetCadenasClientes(@Request.Params["comboboxCanales"], user);
+
+
+
+    //var clientes = WebBiotec.Models.DAO.DaoControlPresupuesto.getClientes();
+    var ventas = WebBiotec.Models.DAO.DaoControlPresupuesto.getVentas(@Request.Params["comboboxCanales"], @Request.Params["comboboxClientes"], @Request.Params["monthpicker"]);
+    var ano = "";
+    var anoAnterior = "";
+    foreach (var item in ventas)
+    {
+        ano = item.ANO;
+        anoAnterior = item.ANO_ANTERIOR;
+    }
+
+    List<WebBiotec.Models.DTO.totalPrevision> prevision = WebBiotec.Models.DAO.DaoControlPresupuesto.getPrevision(@Request.Params["comboboxCanales"], @Request.Params["comboboxClientes"], @Request.Params["monthpicker"]);
+    List<WebBiotec.Models.DTO.totalFacturado> facturado = WebBiotec.Models.DAO.DaoControlPresupuesto.getFacturado(@Request.Params["comboboxCanales"], @Request.Params["comboboxClientes"], @Request.Params["monthpicker"]);
+    List<WebBiotec.Models.DTO.detalleCuenta> detallePorCuenta = WebBiotec.Models.DAO.DaoControlPresupuesto.getDetallePorCuenta(@Request.Params["comboboxCanales"], @Request.Params["comboboxClientes"], @Request.Params["monthpicker"]);
+    List<WebBiotec.Models.DTO.detallesDocumentos> detallesDocumentos = WebBiotec.Models.DAO.DaoControlPresupuesto.getDetallesDocumentos(@Request.Params["comboboxCanales"], @Request.Params["comboboxClientes"], @Request.Params["monthpicker"]);
+    var cuentasClientes = WebBiotec.Models.DAO.DaoControlDocumento.getClientesCuentas(@Request.Params["comboboxClientes"]);
+
+
+    if (prevision.Count < 2)
+    {
+        WebBiotec.Models.DTO.totalPrevision item = new WebBiotec.Models.DTO.totalPrevision();
+        item.MES = "";
+        item.VALOR = 0;
+        prevision.Add(item);
+        //prevision.Add(item);
+    }
+    if (facturado.Count < 2)
+    {
+        WebBiotec.Models.DTO.totalFacturado item = new WebBiotec.Models.DTO.totalFacturado();
+        item.MES = "";
+        item.VALOR = 0;
+        facturado.Add(item);
+        //prevision.Add(item);
+    }
+
+    var vProvisionAcumulado = prevision[0] == null ? 0 : @prevision[0].VALOR;
+    var vProvisionMes = prevision[1] == null ? 0 : @prevision[1].VALOR;
+
+    var vFacturadoAcumulado = facturado[0] == null ? 0 : @facturado[0].VALOR;
+    var vFacturadoMes = facturado[1] == null ? 0 : @facturado[1].VALOR;
+
+
+
+    var vPresupuestoAcumulado = vProvisionAcumulado - vFacturadoAcumulado;
+    var vPresupuestoMes = vProvisionMes - vFacturadoMes;
+    var vAcumuladoMes = vPresupuestoAcumulado + vPresupuestoMes;
+
+
+
+    //Request.Params["comboboxCanales"] = "" ? Layout : Request.Params["comboboxCanales"];
+
+
+
+}
+
+
+<style>
+    #chartdivVentasMM, #chartdivPresupuestoEjecucion {
+        width: 100%;
+        height: 400px;
+        background-color: rgb(255, 255, 255);
+        overflow: visible;
+        text-align: left;
+    }
+
+    #chartdivRelacionProvision {
+        width: 100%;
+        height: 500px;
+        background-color: rgb(255, 255, 255);
+        overflow: visible;
+        text-align: left;
+    }
+</style>
+
+
+<div class="row x_title">
+    <div class="col-md-12">
+        <h3 style="font-weight:bold">CONTROL PRESUPUESTO TRADE MARKETING (CPTM)<small></small></h3>
+    </div>
+
+</div>
+
+<div class="panel-group" id="accordion" style="padding-top:10px; padding-bottom:10px;">
+    <div class="panel" style="background-color:#003140;">
+        <div class="panel-heading" style="color:#ffffff;background-color:#3e4855;margin:0px !important">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="">Filtros</a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+
+                <form class="form-horizontal bordered-row" method="get">
+                    <div class="row">
+
+                        <div class="col-lg-3 col-md-3 col-sm-12">
+                            @*<div class="form-group">*@
+                                <div class="col-lg-4 col-md-4 col-sm-12">
+                                    <label class="control-label" style="color:#ffffff;">FECHA:</label>
+                                 </div>
+                                @*<label class="col-lg-4 col-md-4 col-sm-4 control-label pull-left" style="color:#ffffff;">FECHA:</label>*@
+                                <div class="col-lg-8 col-md-8 col-sm-12 pull-left">
+                                    <input id="monthpicker" name="monthpicker" title="Fecha" style="width: 100%;margin:auto" />
+                                </div>
+                                @*</div>*@
+                            </div>
+
+                        <div class="col-lg-3 col-md-3 col-sm-12">
+                            <div class="col-lg-3 col-md-3 col-sm-12">
+                                <label class="control-label" style="color:#ffffff;">CANALES:</label>
+                            </div>
+                            <div class="col-lg-9 col-md-9 col-sm-12 pull-left">
+                                <select class="form-control" name="comboboxCanales" id="comboboxCanales" style="width: 100%;margin:auto" >
+                                    <option value="0">TODOS</option>
+                                    @foreach (var items in canales)
+                                    {
+                                        <option value="@items.valor">@items.texto</option>
+                                    }
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12">
+                                <div class="col-lg-4 col-md-4 col-sm-12">
+                                    <label class="pull-left control-label" style="color:#ffffff;">CADENAS Y CLIENTES:</label>
+                                </div>
+                                <div class="col-lg-7 col-md-7 col-sm-12 pull-left">
+                                    <select class="form-control" name="comboboxClientes" id="comboboxClientes" style="width: 100%;margin:auto">
+                                        <option value="0">TODOS</option>
+                                        @foreach (var items in cadenasClientes)
+                                        {
+                                            <option value="@items.valor">@items.texto</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                    </div>
+
+                    <div class="row" style="padding-top:10px">
+
+
+
+
+
+                        @*<div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label pull-left" style="color:#ffffff;">FECHA:</label>
+                                <div class="col-sm-8 pull-right">
+                                    <input id="monthpicker" name="monthpicker" title="Fecha" style="width: 100%" />
+                                </div>
+                            </div>
+                        </div>*@
+
+
+                    </div>
+
+                    <div class="row" style="padding-top:10px">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            <div class="form-horizontal bordered-row pull-right">
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+
+                                    <input type="submit" class="btn btn-default" id="filtrar" name="filtrar" value="Filtrar">                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+                @*<div class="form-horizontal bordered-row pull-right">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            <button type="button" class="btn btn-default" id="linkResultadosLocales" onclick="Filtrar();" style="margin-bottom:20px">Filtrar</button>
+                            <button type="button" class="btn btn-default" id="linkLimpiar" onclick="Limpiar();" style="margin-bottom:20px; margin-right:10px">Limpiar</button>
+
+
+                        </div>
+                    </div>*@
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Sección Ventas MM*@
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+
+<div class="row x_title">
+    <div class="col-md-6">
+        <h2 style="font-weight:bold">I VENTAS</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-xs-12 ">
+        <div class="clearfix"></div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h3 style="font-weight:bold">TOTALES <small></small></h3>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-hover" id="tablaVentas" name="tablaVentas">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align:right">MONTO @ano</th>
+                                <th style="text-align:right">MONTO @anoAnterior</th>
+                                <th style="text-align:right">DIFERENCIA</th>
+                                <th style="text-align:right">%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                               
+                                    @foreach (var item in ventas)
+                                    {
+                                        if (@item.texto != "TOTAL")
+                                        {
+                                        <tr>
+                                            <td>@item.texto</td>
+                                            <td style="text-align:right">@item.valor.ToString("N0").Replace(',', '.')</td> 
+                                            <td style="text-align:right">@item.valor2.ToString("N0").Replace(',', '.')</td> 
+                                            <td style="text-align:right">@((item.valor - item.valor2).ToString("N0").Replace(',', '.'))</td>
+                                            <td style="text-align:right">@item.porcentaje</td>
+                                        </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr style="font-weight:bold; font-size:small">
+                                                <td>@item.texto</td>
+                                                <td style="text-align:right">@item.valor.ToString("N0").Replace(',', '.')</td>
+                                                <td style="text-align:right">@item.valor2.ToString("N0").Replace(',', '.')</td>
+                                                <td style="text-align:right">@((item.valor - item.valor2).ToString("N0").Replace(',', '.'))</td>
+                                                <td style="text-align:right">@item.porcentaje</td>
+                                            </tr>
+                                        }
+                                    }
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="clearfix"></div>
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h3 style="font-weight:bold">VENTAS (M$) <small></small></h3>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div id="chartdivVentasMM"></div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+
+
+@*PRESUPUESTO GASTOS TRADE MARKETING*@
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+<div class="row x_title">
+    <div class="col-md-6">
+        <h2 style="font-weight:bold">II PRESUPUESTO GASTOS TRADE MARKETING</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-xs-12 ">
+        <div class="clearfix"></div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h3 style="font-weight:bold">RESUMEN MENSUAL <small></small></h3>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th style="text-align:right">ACUMULADO A @(facturado[0] == null ? "MES" : facturado[0].MES)</th>
+                                    <th style="text-align:right">@(facturado[1] == null ? "MES" : facturado[1].MES)</th>
+                                    <th style="text-align:right">ACUMULADO A @(facturado[1] == null ? "MES" : facturado[1].MES)</th>
+                                    <th style="width:100px;text-align:right"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Gastos Presupuestados</td>
+
+                                    <td style="text-align:right">@(prevision[0] == null ? "0" : @prevision[0].VALOR.ToString("N0").Replace(',', '.'))</td>
+                                    <td style="text-align:right">@(prevision[1] == null ? "0" : @prevision[1].VALOR.ToString("N0").Replace(',', '.'))</td>
+                                    <td style="text-align:right">@(prevision[2] == null ? "0" : @prevision[2].VALOR.ToString("N0").Replace(',', '.'))</td>
+                                    <td></td>
+                                </tr>
+                                @*<tr>
+                        <td>Gastos Provisionados</td>
+
+                        <td>@(prevision[0] == null ? "0" : @prevision[0].VALOR.ToString("N0").Replace(',', '.'))</td>
+                        <td>@(prevision[1] == null ? "0" : @prevision[1].VALOR.ToString("N0").Replace(',', '.'))</td>
+                    </tr>*@
+                                <tr>
+                                    <td>Gastos Facturados</td>
+                                    <td style="text-align:right">@(facturado[0] == null ? "0" : @facturado[0].VALOR.ToString("N0").Replace(',', '.'))</td>
+                                    <td style="text-align:right">@(facturado[1] == null ? "0" : @facturado[1].VALOR.ToString("N0").Replace(',', '.'))</td>
+                                    <td style="text-align:right">@(facturado[2] == null ? "0" : @facturado[2].VALOR.ToString("N0").Replace(',', '.'))</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:bold">Presupuesto Disponible (*)</td>
+                                    @if (vPresupuestoAcumulado > 0)
+                                    {
+                                        <td style="font-weight:bold;text-align:right">@vPresupuestoAcumulado.ToString("N0").Replace(',', '.')</td>
+                                    }
+                                    else
+                                    {
+                                        <td style="color:red;font-weight:bold;text-align:right">@vPresupuestoAcumulado.ToString("N0").Replace(',', '.')</td>
+                                    }
+
+                                    @if (vPresupuestoMes > 0)
+                                    {
+                                        <td style="font-weight:bold;text-align:right">@vPresupuestoMes.ToString("N0").Replace(',', '.')</td>
+                                    }
+                                    else
+                                    {
+                                        <td style="color:red;font-weight:bold;text-align:right">@vPresupuestoMes.ToString("N0").Replace(',', '.')</td>
+                                    }
+                                    @if (vAcumuladoMes > 0)
+                                    {
+                                        <td style="font-weight:bold;text-align:right">@vAcumuladoMes.ToString("N0").Replace(',', '.')</td>
+                                    }
+                                    else
+                                    {
+                                        <td style="color:red;font-weight:bold;text-align:right">@vAcumuladoMes.ToString("N0").Replace(',', '.')</td>
+                                    }
+                                    <td></td>
+
+
+                                </tr>
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <p style="font-weight:bold">
+                                (*) Corresponde al monto de gastos presupuestados, menos el monto indicado por las facturas de publicidad recibidas a la fecha del informe. Para determinar la exactitud del presupuesto disponible se deben considerar las facturas de publicidad que se encuentren en proceso de emision y los gastos ya comprometidos con el cliente.
+                            </p>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+   
+</div>
+
+
+@*Grafico comentado xxx*@
+@*<div class="row">
+
+    <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="clearfix"></div>
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h3 style="font-weight:bold">RELACIÓN PRESUPUESTO V/S GASTO REAL<small></small></h3>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                
+                <div class="x_content">
+                    <div id="chartdivRelacionProvision" ></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>*@
+
+    <div class="row x_title">
+        <div class="col-md-6">
+            <h2 style="font-weight:bold">DETALLE POR CUENTA</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="clearfix"></div>
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        
+                        @if (detallePorCuenta.Count() > 0)
+                        {
+                            <h3 style="font-weight:bold">ACUMULADO AL MES DE @detallePorCuenta[0].MES.ToUpper()<small></small></h3>
+                        }
+                        else
+                        {
+                            <h3 style="font-weight:bold">ACUMULADO AL MES DE <small></small></h3>
+
+                        }
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li class="pull-right text-right">
+                                <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="table-responsive">
+                              <table id="datatable_f1" class="table table-striped jambo_table bulk_action">
+                                    <thead>
+                                        <tr class="headings">
+                                            <th class="column-title">CUENTA CONTABLE</th>
+                                            <th class="column-title" style="text-align:right">% UF</th>
+                                            <th style="text-align:right" class="column-title">GASTO PRESUPUESTADO</th>
+                                            <th style="text-align:right" class="column-title">GASTO FACTURADO</th>
+                                            <th style="text-align:right" class="column-title">MONTO DISPONIBLE</th>
+
+                                            @*Campos ocultos*@
+                                            <th style="text-align:right" class="column-title">GASTO PRESUPUESTADO</th>
+                                            <th style="text-align:right" class="column-title">GASTO FACTURADO</th>
+                                            <th style="text-align:right" class="column-title">MONTO DISPONIBLE</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        @foreach (var item in detallePorCuenta)
+                                        {
+                                            if (@item.CONCEPTO != "TOTAL")
+                                            {
+                                                @*<tr class="even pointer">
+                                                    <td>@item.CONCEPTO</td>
+                                                    <td>@item.PORCENTAJE @item.TIPO_CALCULO</td>
+                                                    <td style="text-align:right">@item.PRESUPUESTO</td>
+                                                    <td style="text-align:right">@item.FACTURADO</td>
+                                                    <td style="text-align:right">@item.MONTO_DISPONIBLE</td>
+                                                </tr>*@
+
+                                                <tr class="even pointer">
+                                                    <td>@item.CONCEPTO</td>
+                                                    <td>@item.PORCENTAJE @item.TIPO_CALCULO</td>
+                                                    <td style="text-align:right">@item.PRESUPUESTO.ToString("N0").Replace(',', '.')</td>
+                                                    <td style="text-align:right">@item.FACTURADO.ToString("N0").Replace(',', '.')</td>
+                                                    <td style="text-align:right">@item.MONTO_DISPONIBLE.ToString("N0").Replace(',', '.')</td>
+
+                                                    <td style="text-align:right">@item.PRESUPUESTO</td>
+                                                    <td style="text-align:right">@item.FACTURADO</td>
+                                                    <td style="text-align:right">@item.MONTO_DISPONIBLE</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr class="even pointer" style="font-weight:bold; font-size:small">
+                                                    <td>@item.CONCEPTO</td>
+                                                    <td></td>
+                                                    <td style="text-align:right">@item.PRESUPUESTO.ToString("N0").Replace(',', '.')</td>
+                                                    <td style="text-align:right">@item.FACTURADO.ToString("N0").Replace(',', '.')</td>
+                                                    <td style="text-align:right">@item.MONTO_DISPONIBLE.ToString("N0").Replace(',', '.')</td>
+
+                                                    <td style="text-align:right">@item.PRESUPUESTO</td>
+                                                    <td style="text-align:right">@item.FACTURADO</td>
+                                                    <td style="text-align:right">@item.MONTO_DISPONIBLE</td>
+                                                </tr>
+                                            }
+
+                                        }
+                                        @*<tr class="even pointer">
+                    <td>Rappel / Aporte Fijo</td>
+                    <td>10%</td>
+                    <td>9,151,241</td>
+                    <td>9,151,242</td>
+                    <td>5,176,700</td>
+                    <td>3,974,542</td>
+                    <td>43%</td>
+                </tr>
+                <tr class="odd pointer">
+                    <td>Aportes Extras</td>
+                    <td>20%</td>
+                    <td>9,151,241</td>
+                    <td>9,151,242</td>
+                    <td>5,176,700</td>
+                    <td>3,974,542</td>
+                    <td>53%</td>
+                </tr>
+                <tr class="even pointer">
+                    <td>Descuentos Promocionales</td>
+                    <td>20%</td>
+                    <td>9,151,241</td>
+                    <td>9,151,242</td>
+                    <td>5,176,700</td>
+                    <td>3,974,542</td>
+                    <td>63%</td>
+                </tr>
+                <tr class="odd pointer">
+                    <td>Premios por Ventas</td>
+                    <td>30%</td>
+                    <td>9,151,241</td>
+                    <td>9,151,242</td>
+                    <td>5,176,700</td>
+                    <td>3,974,542</td>
+                    <td>73%</td>
+                </tr>*@
+                                    </tbody>
+                                </table>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        @*<h2 style="font-weight:bold">Presupuesto v/s Ejecución de Gasto<small></small></h2>*@
+                        <h3 style="font-weight:bold">PRESUPUESTO V/S EJECUCIÓN DE GASTO<small></small></h3>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li class="pull-right text-right">
+                                <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div id="chartdivPresupuestoEjecucion"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*DETALLE POR DOCUMENTO*@
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="clearfix"></div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+
+                    <h3 style="font-weight:bold">DETALLE POR DOCUMENTO<small></small></h3>
+
+                    @*/////////////////////////////////////////////////////////////////*@
+
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <form class="form-horizontal bordered-row" method="get">
+                            <div class="row">
+                                <div class="col-lg-8 col-md-8 col-sm-12">
+                                    <div class="col-lg-3 col-md-3 col-sm-12">
+                                        <label class="control-label">CUENTA CONTABLE:</label>
+                                    </div>
+
+                                    <div class="col-lg-7 col-md-7 col-sm-12 pull-left">
+                                        <select class="form-control" name="comboboxCuentas" id="comboboxCuentas" style="width: 100%;margin:auto">
+                                            <option value="">TODAS</option>
+                                            @foreach (var items in cuentasClientes)
+                                            {
+                                                <option value="@items.VALOR">@items.TEXTO</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+
+                <div class="x_content">
+                    <div id="detalle_documento_content">
+                        <div id="detalle_documento" class="table-responsive">
+                            @*<table id="datatable" class="table table-striped jambo_table bulk_action">*@
+                            <table id="DatatableCuentas" class="display table table-striped jambo_table bulk_action">                              
+                                <thead>
+                                    <tr class="headings">
+                                        <th class="column-title" style="text-align:left">FACTURA</th>
+                                        <th class="column-title" style="text-align:left">CUENTA CONTABLE</th>
+                                        <th class="column-title" style="text-align:left">FECHA FACTURA</th>
+                                        <th class="column-title" style="text-align:left">MES/GASTO</th>
+                                        <th class="column-title" style="text-align:left">GLOSA</th>
+                                        <th class="column-title" style="text-align:left">MONTO</th>
+                                        <th class="column-title" style="text-align:left">ESTADO</th>
+                                        <th class="column-title"></th>
+
+                                        @*Columnas Ocultas*@
+                                        <th class="column-title" style="text-align:left">MONTO</th>
+                                    </tr>
+                                </thead>     
+                                <tbody>
+                                @foreach (var item in detallesDocumentos)
+                                {
+                                <tr class="even pointer">
+                                @*<tr>*@
+                                    <td class="text-left">@item.N_FACTURA</td>
+                                    <td class="text-left">@item.CONCEPTO</td>
+                                    <td class="text-left">@item.FECHA_GASTO</td>
+                                    <td class="text-left">@item.FECHA_EMISION</td>                                    
+                                    <td class="text-left">@item.GLOSA</td>
+                                    <td class="text-right">@item.MONTO</td>
+                                    <td class="text-left">@item.ESTADO</td>
+
+                                    <td style="text-align:left"><a onClick="VerFactura('@item.CARPETA.Substring(0,4)', '@item.CARPETA', '@item.RUT', '@item.N_FACTURA')"><i class="fa fa-file"></i></a></td>
+
+                                    @*Columnas Ocultas*@
+                                    <td class="text-right">@item.MONTO.Replace(".","")</td>
+                                </tr>
+                                }                                   
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+                <div class="clearfix"></div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                    </div>
+                </div>
+
+            </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+    @*<div class="row">
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <div class="clearfix"></div>
+
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_content">
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>*@
+
+
+    @*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+
+    <script>
+
+        $(document).ready(function () {
+
+            kendo.culture("es-CL");
+            // create DatePicker from input HTML element
+            $("#datepicker").kendoDatePicker();
+
+            $("#monthpicker").kendoDatePicker({
+                // defines the start view
+                start: "year",
+
+                // defines when the calendar should return date
+                depth: "year",
+
+                // display month and year in the input
+                //format: "MMMM yyyy",
+                //format: "MM-yyyy",
+                format: "yyyyMM",
+                maxDate: '0',
+
+                // specifies that DateInput is used for masking the input element
+                dateInput: true,
+                animation: {
+                    close: {
+                        effects: "zoom:out",
+                        duration: 300
+                    }
+                }
+
+            });
+
+            @*var clientesDS = new kendo.data.DataSource({
+            transport: {
+                read: {
+
+                    url: '@Url.Action("cargarCadenasClientesJSON", "TradeMarketing")',
+                    dataType: "json",
+                    data: { codCanal: '@Request.Params["comboboxCanales"]' },
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        valor: { type: "string" },
+                        texto: { type: "string" }
+                    }
+                }
+            }
+        });*@
+
+
+            //var dataComboboxClientes = [
+            // { texto: "Todos", valor: "0" },
+            //];
+
+            $("#comboboxClientes").kendoComboBox({
+                //placeholder: "Seleccionar",
+                clearButton: false,
+                dataValueField: "valor",
+                dataTextField: "texto",
+                //dataSource: dataComboboxClientes,
+                animation: {
+                    close: {
+                        effects: "zoom:out",
+                        duration: 300
+                    }
+                }
+            });
+
+            $("#comboboxCanales").kendoComboBox({
+                clearButton: false,
+                dataValueField: "valor",
+                dataTextField: "texto",
+                animation: {
+                    close: {
+                        effects: "zoom:out",
+                        duration: 300
+                    }
+                }
+            });
+
+            $("#comboboxCuentas").kendoComboBox({
+                clearButton: false,
+                dataValueField: "valor",
+                dataTextField: "texto",
+                animation: {
+                    close: {
+                        effects: "zoom:out",
+                        duration: 300
+                    }
+                }
+            });
+
+
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth();
+            var yyyy = today.getFullYear();
+
+            var sumaMes = 1;
+            var fechaActual;
+
+            //if (mm == 12) {
+            //    //fechaActual = 1 + '-' + yyyy;
+            //    fechaActual = yyyy + '-' +  1;
+            //}
+            //else {
+            //    fechaActual = yyyy + '-' + mm ;
+            //    //fechaActual = mm + 1 + '-' + yyyy;
+            //}
+
+            //$("#monthpicker").data('kendoDatePicker').value(fechaActual);
+            @*$("#monthpicker").data('kendoDatePicker').value('@Request.Params["mes"]');*@
+            //$("#monthpicker").data('kendoDatePicker').value('2018-02');
+
+
+            @*$("#monthpicker").data('kendoDatePicker').value("@Request.Params["mes"]");*@
+
+
+
+            var documentosDS = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: '@Url.Action("cargarClientesJSON", "TradeMarketing")',
+                        dataType: "json",
+                    }
+                },
+                schema: {
+                    model: {
+                        fields: {
+                            valor: { type: "string" },
+                            texto: { type: "string" }
+                        }
+                    }
+                }
+            });
+
+            $("#comboboxNumeroDocumento").kendoComboBox({
+                //placeholder: "Todos",
+                clearButton: false,
+                dataValueField: "valor",
+                dataTextField: "texto",
+                dataSource: documentosDS,
+                animation: {
+                    close: {
+                        effects: "zoom:out",
+                        duration: 300
+                    }
+                }
+            });
+
+        });
+
+    </script>
+
+
+
+    <!-- Gráfico Relación Provision v/s Gasto Real (Mes -->
+    @*<script type="text/javascript">
+        AmCharts.makeChart("chartdivRelacionProvision",
+                    {
+                        "type": "serial",
+                        "categoryField": "category",
+                        "colors": [
+                            "#69B4DB",
+                            "#D5DBDB",
+                            "#B0DE09",
+                            "#0D8ECF",
+                            "#2A0CD0",
+                            "#CD0D74",
+                            "#CC0000",
+                            "#00CC00",
+                            "#0000CC",
+                            "#DDDDDD",
+                            "#999999",
+                            "#333333",
+                            "#990000"
+                        ],
+                        "startDuration": 1,
+                        "categoryAxis": {
+                            "gridPosition": "start"
+                        },
+                        "trendLines": [],
+                        "graphs": [
+                            {
+                                "balloonText": "[[title]] of [[category]]:[[value]]",
+                                "fillAlphas": 1,
+                                "id": "AmGraph-1",
+                                "title": "Provision",
+                                "type": "column",
+                                "valueField": "column-1"
+                            },
+                            {
+                                "balloonText": "[[title]] of [[category]]:[[value]]",
+                                "fillAlphas": 1,
+                                "id": "AmGraph-2",
+                                "title": "Gasto real",
+                                "type": "column",
+                                "valueField": "column-2"
+                            }
+                        ],
+                        "guides": [],
+                        "valueAxes": [
+                            {
+                                "id": "ValueAxis-1",
+                                //"title": "Axis title"
+                            }
+                        ],
+                        "allLabels": [],
+                        "balloon": {},
+                        "legend": {
+                            "enabled": true,
+                            "useGraphSettings": true
+                        },
+                        "titles": [
+                            {
+                                "id": "Title-1",
+                                "size": 15,
+                                "text": ""
+                            }
+                        ],
+                        "dataProvider": [
+                            {
+                                "category": "2018-01",
+                                "column-1": 8,
+                                "column-2": 5
+                            },
+                            {
+                                "category": "2018-02",
+                                "column-1": 6,
+                                "column-2": 7
+                            },
+                            {
+                                "category": "2018-03",
+                                "column-1": 2,
+                                "column-2": 3
+                            },
+                            {
+                                "category": "2018-04",
+                                "column-1": 8,
+                                "column-2": 20
+                            },
+                            {
+                                "category": "2018-05",
+                                "column-1": 2,
+                                "column-2": 3
+                            }
+                            ,
+                            {
+                                "category": "2018-06",
+                                "column-1": 2,
+                                "column-2": 3
+                            }
+                            ,
+                            {
+                                "category": "2018-07",
+                                "column-1": 2,
+                                "column-2": 3
+                            }
+                            ,
+                            {
+                                "category": "2018-08",
+                                "column-1": 2,
+                                "column-2": 3
+                            }
+                            ,
+                            {
+                                "category": "2018-09",
+                                "column-1": 2,
+                                "column-2": 3
+                            },
+                            {
+                                "category": "2018-10",
+                                "column-1": 2,
+                                "column-2": 3
+                            },
+                            {
+                                "category": "2018-11",
+                                "column-1": 2,
+                                "column-2": 3
+                            },
+                            {
+                                "category": "2018-12",
+                                "column-1": 2,
+                                "column-2": 3
+                            }
+
+                        ]
+                    }
+                );
+    </script>*@
+
+    <!-- Gráfico Presupuesto vs ejecución de gasto -->
+    @*<script type="text/javascript">
+        AmCharts.makeChart("chartdivPresupuestoEjecucion",
+                    {
+                        "type": "serial",
+                        "categoryField": "category",
+                        "columnSpacing": 8,
+                        "dataDateFormat": "",
+                        "rotate": true,
+                        "angle": 30,
+                        "depth3D": 30,
+                        "colors": [
+                            "#298A08",
+                            "#FFFF00",
+                            "#B0DE09",
+                            "#0D8ECF",
+                            "#2A0CD0",
+                            "#CD0D74",
+                            "#CC0000",
+                            "#00CC00",
+                            "#0000CC",
+                            "#DDDDDD",
+                            "#999999",
+                            "#333333",
+                            "#990000"
+                        ],
+                        "startDuration": 1,
+                        "categoryAxis": {
+                            "gridPosition": "start"
+                        },
+                        "trendLines": [],
+                        "graphs": [
+                            {
+                                "balloonText": "[[title]] of [[category]]:[[value]]",
+                                "fillAlphas": 1,
+                                "id": "AmGraph-1",
+                                "title": "Monto Disponible",
+                                "type": "column",
+                                "valueField": "column-1"
+                            },
+                            {
+                                "balloonText": "[[title]] of [[category]]:[[value]]",
+                                "fillAlphas": 1,
+                                "id": "AmGraph-2",
+                                "title": "Gtos Facturados",
+                                "type": "column",
+                                "valueField": "column-2"
+                            }
+                        ],
+                        "guides": [],
+                        "valueAxes": [
+                            {
+                                "id": "ValueAxis-1",
+                                "stackType": "regular",
+                                "title": ""
+                            }
+                        ],
+                        "allLabels": [],
+                        "balloon": {},
+                        "legend": {
+                            "enabled": true,
+                            "useGraphSettings": true
+                        },
+                        "titles": [
+                            {
+                                "id": "Title-1",
+                                "size": 15,
+                                "text": ""
+                            }
+                        ],
+                        "dataProvider": [
+                            {
+                                "category": "Rappel / Aporte Fijo",
+                                "column-1": 8,
+                                "column-2": 5
+                            },
+                            {
+                                "category": "Aportes Extras",
+                                "column-1": 6,
+                                "column-2": 7
+                            },
+                            {
+                                "category": "Descuentos Promocionales",
+                                "column-1": 2,
+                                "column-2": 3
+                            }
+                        ]
+                    }
+                );
+    </script>*@
+
+    <script>
+        $(window).load(function () {
+
+            var valMes = '@Request.Params["monthpicker"]';
+            if (valMes.length == 0) {
+                valMes = '@ViewBag.fecha';
+            }
+
+            var valCanales = '@Request.Params["comboboxCanales"]';
+            if (valCanales.length == 0) {
+                valCanales = '0';
+            }
+            var valClientes = '@Request.Params["comboboxClientes"]';
+            if (valClientes.length == 0) {
+                valClientes = '0';
+            }
+
+            $("#monthpicker").data('kendoDatePicker').value(valMes);
+            $("#comboboxCanales").data('kendoComboBox').value(valCanales);
+            $("#comboboxClientes").data('kendoComboBox').value(valClientes);
+
+            //$('#comboboxClientes option[value="' +  valClientes + '"]').attr("selected",true);
+
+            @*$('#comboboxClientes option[value="@Request.Params["comboboxClientes"]"]').attr("selected", true);*@
+            @*$('#comboboxClientes option[value="@Request.Params["comboboxClientes"]"]').attr("selected", true);*@
+
+            //$("#comboboxClientes").data('kendoComboBox').value(valClientes);
+
+
+
+
+            //Clientes
+            //$("#comboboxCanales").data('kendoComboBox').value("0");
+
+            @*$("#monthpicker").data('kendoDatePicker').value('@Request.Params["monthpicker"]');*@
+            @*$("#comboboxClientes").data('kendoComboBox').value("@Request.Params["comboboxClientes"]");*@
+            @*$("#monthpicker").data('kendoDatePicker').value('@ViewBag.fecha');*@
+
+
+
+
+            $('#comboboxCanales option[value="@Request.Params["comboboxCanales"]"]').attr("selected", true);
+
+
+        });
+    </script>
+
+    <script type="text/javascript">
+
+    @*MakeDashboardVentas("@Request.Params["comboboxClientes"]","@Request.Params["monthpicker"]");*@
+
+        MakeGraficoVentas("@Request.Params["comboboxCanales"]", "@Request.Params["comboboxClientes"]", "@Request.Params["monthpicker"]");
+        MakeGraficoProvisionFacturas("@Request.Params["comboboxCanales"]", "@Request.Params["comboboxClientes"]", "@Request.Params["monthpicker"]");
+        MakeGraficoPresupuestoVsGasto("@Request.Params["comboboxCanales"]", "@Request.Params["comboboxClientes"]", "@Request.Params["monthpicker"]");
+   
+
+
+    </script>
+
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+
+            var buttonCommon = {
+                exportOptions: {
+                    exportOptions: {
+                        columns: ':visible',
+                        format: {
+                            body: function (data, row, column, node) {
+                                return data.replace(',', '.');
+                            }
+
+                        }
+                    }
+                }
+            };
+
+            $('#DatatableCuentas').dataTable({
+                destroy: true,
+                responsive: true,
+                "bPaginate": true,
+                "pageLength": 20,
+                "bInfo": false,
+                "bLengthChange": false,
+                "ordering": false,
+                dom: 'Bfrtip',
+                buttons: [
+                {
+                    extend: 'excel',
+                    exportOptions: {
+                        columns: [0, 1,2,3,4,8,6]
+                    }
+                }
+                ],
+                "language": {
+                    //"decimal": ",",
+                    //"thousands": ".",
+                    "sLoadingRecords": "Cargando...",
+                    "sProcessing": "Procesando...",
+                    "sSearch": "Buscar:",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                "columnDefs": [
+                    {
+                        "targets": [8],
+                        "visible": false,
+                        "searchable": false
+                    }
+                    //{
+                    //    "targets": [3],
+                    //    "visible": false,
+                    //    "searchable": false
+                    //},
+                    //{
+                    //    "targets": [4],
+                    //    "visible": false,
+                    //    "searchable": false
+                    //}
+                ]
+            });
+
+        //    $("#filtrar").click(function () {
+        //        cargarDatatable();
+        //    }
+        //);
+
+            function cargarDatatable() {
+
+                //////////////////////////////////////////////////////////
+                //alert('1')
+                $("#datatable tbody tr").remove();
+
+                var CODCANAL = "@Request.Params["comboboxCanales"]";
+                var RUTCLIENTE = "@Request.Params["comboboxClientes"]";
+                var MES = "@Request.Params["monthpicker"]";
+                var CUENTA = $("#comboboxCuentas").val();
+
+                $.ajax({
+                    url: '/TradeMarketing/getDetallesDocumentosCuenta',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        CODCANAL: CODCANAL,
+                        RUTCLIENTE: RUTCLIENTE,
+                        MES: MES,
+                        CUENTA: CUENTA
+                    },
+                })
+                .fail(function (xhr, status, error) {
+                    console.log("error:" + status + "-" + error);
+                })
+                .always(function (data) {
+                    console.log(data);
+                    var buttonCommon = {
+                        exportOptions: {
+                            exportOptions: {
+                                columns: ':visible',
+                                format: {
+                                    body: function (data, row, column, node) {
+                                        return data.replace(',', '.');
+                                    }
+
+                                }
+                            }
+                        }
+                    };
+                  
+                    $('#DatatableCuentas').DataTable({
+                        //retrieve: true,
+                        destroy: true,
+                        responsive: true,
+                        "bPaginate": true,
+                        "pageLength": 20,
+                        "bInfo": false,
+                        "bLengthChange": false,
+                        "ordering": false,
+                        dom: 'Bfrtip',
+                        buttons: [
+                        {
+                            extend: 'excel',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 8, 6]
+                            }
+                        }
+                        ],
+                        "language": {
+                            //"decimal": ",",
+                            //"thousands": ".",
+                            "sLoadingRecords": "Cargando...",
+                            "sProcessing": "Procesando...",
+                            "sSearch": "Buscar:",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+
+                        //"columnDefs": [
+                        //    {
+                        //        "targets": [0],
+                        //        "visible": false,
+                        //        "searchable": false
+                        //    }
+
+                        //],
+
+
+
+                        "data": data,
+             //           columns: [
+             //{ data: "column_b", render: $.fn.dataTable.render.number( ' ', '.', 0, '$' ) }
+             //           ]
+                        "columns": [
+                       { data: 'N_FACTURA' },
+                       { data: 'CONCEPTO' },
+                       { data: 'FECHA_GASTO' },
+                       { data: 'FECHA_EMISION' },                       
+                       { data: 'GLOSA' },
+                       //{ data: "MONTO", render: $.fn.dataTable.render.number(' ', '.', 0, '$') },
+                       { data: 'MONTO' },
+                       { data: 'ESTADO' },
+                       { data: 'CARPETA' },
+                       { data: 'MONTO2' }
+                        ],
+                        "aoColumnDefs": [
+                            {
+                                "targets": [8],
+                                "visible": false,
+                                "searchable": false
+                            },
+                    {
+                   "mRender": function (data, type, row) {
+                       return '<a href="javascript:void(0);" onclick="VerFactura(' + row.CARPETA.substring(0, 4) + ', \'' + row.CARPETA + '\' , \'' + row.RUT + ' \', \'' + row.N_FACTURA + '\');">' + '<i class="fa fa-file"></i></a>'
+                        }, "aTargets": [7]
+                    }
+                    , { className: "text-left", "targets": [0, 1, 2, 3, 4, 6] }
+                    , { className: "text-right", "targets": [5] }
+                    //, { width: 210, targets: 1 }
+                    //, { width: 112, targets: 2 }
+                    //, { width: 79, targets: 3 }
+                    //, { width: 350, targets: 4 }
+                    //, { width: 54, targets: 5 }
+                    //, { width: 60, targets: 6 }
+                    //, { width: 10, targets: 7 }
+                        ],
+                        fixedColumns: true
+  
+                    });
+
+                });
+
+                /////////////////////////////////////////////////////////
+
+
+                return false;
+
+            }
+
+            $("#comboboxCanales").change(function () {
+                //alert('1');
+                var valor = $(this).val();
+                MakeLoadClientes(valor,'@user','TODOS');
+            });
+
+            $("#comboboxCuentas").change(function () {
+                var valor = $(this).val();
+
+                cargarDatatable();
+                @*LoadDetalleDocumentoPorCuenta("@Request.Params["comboboxCanales"]", "@Request.Params["comboboxClientes"]", "@Request.Params["monthpicker"]", valor);*@
+            });
+
+        });
+
+
+        function VerFactura(ANO, CARPETA, RUT, FACTURA) {
+
+
+            //alert(ANO);
+            //alert(CARPETA);
+            //alert(RUT);
+            //alert(FACTURA);
+            var rutaNombre = ANO + "/" + CARPETA + '/' + RUT.trim() + '_' + FACTURA + '.pdf'
+            //alert(rutaNombre);
+
+
+            $.ajax({
+                url: '@Url.Content("~/Content/documentos/facturas/")' + rutaNombre,
+                type: 'HEAD',
+                error: function () {
+                    alert('No existe el documento');
+                },
+                success: function () {
+                    window.open('@Url.Content("~/Content/documentos/facturas/")' + ANO + "/" + CARPETA + '/' + RUT.trim() + '_' + FACTURA + '.pdf', '_blank');
+                }
+            });
+
+
+        }
+
+        function SaveToDisk(fileURL, fileName) {
+            // for non-IE
+            if (!window.ActiveXObject) {
+                var save = document.createElement('a');
+                save.href = fileURL;
+                save.target = '_blank';
+                save.download = fileName || 'unknown';
+
+                var evt = new MouseEvent('click', {
+                    'view': window,
+                    'bubbles': true,
+                    'cancelable': false
+                });
+                save.dispatchEvent(evt);
+
+                (window.URL || window.webkitURL).revokeObjectURL(save.href);
+            }
+
+                // for IE < 11
+            else if (!!window.ActiveXObject && document.execCommand) {
+                var _window = window.open(fileURL, '_blank');
+                _window.document.close();
+                _window.document.execCommand('SaveAs', true, fileName || fileURL)
+                _window.close();
+            }
+        }
+
+    </script>
+
+
+
+
+
+  
+

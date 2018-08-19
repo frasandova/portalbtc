@@ -1,0 +1,309 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+    //var clientes = WebBiotec.Models.DAO.DaoControlPresupuesto.getClientes();
+    var ventas = WebBiotec.Models.DAO.DaoControlPresupuesto.getVentasConsoliado(@Request.Params["monthpicker"]);
+    var ano = "";
+    var anoAnterior = "";
+    foreach (var item in ventas)
+    {
+        ano = item.ANO;
+        anoAnterior = item.ANO_ANTERIOR;
+    }
+    var facturas_kam = WebBiotec.Models.DAO.DaoControlPresupuesto.getFacturasKam();
+}
+
+
+<div class="row x_title">
+    <div class="col-md-12">
+        <h2 style="font-weight:bold">VENTAS CONSOLIDADO <small></small></h2>
+    </div>
+</div>
+
+<div class="panel-group" id="accordion" style="padding-top:10px; padding-bottom:10px;">
+    <div class="panel" style="background-color:#003140;">
+        <div class="panel-heading" style="color:#ffffff;background-color:#3e4855;margin:0px !important">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="">Filtros</a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <form class="form-horizontal bordered-row" method="get">
+                    <div class="row">                      
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label pull-left" style="color:#ffffff;">FECHA:</label>
+                                <div class="col-sm-8 pull-right">
+                                    <input id="monthpicker" name="monthpicker" title="Fecha" style="width: 100%" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 col-md-8 col-sm-12">
+                            <div class="form-horizontal bordered-row pull-right">
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <input type="submit" class="btn btn-default" id="filtrar" name="filtrar" value="Filtrar">
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Sección Ventas MM*@
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-xs-12 ">
+        <div class="clearfix"></div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h3 style="font-weight:bold">TOTALES <small></small></h3>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-hover" id="tablaVentas" name="tablaVentas">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>MONTO @ano</th>
+                                <th>MONTO @anoAnterior</th>
+                                <th>DIFERENCIA</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in ventas)
+                            {
+                                if (@item.texto != "TOTAL")
+                                {
+                                    <tr>
+                                        <td>@item.texto</td>
+                                        <td>@item.valor.ToString("N0").Replace(',', '.')</td>
+                                        <td>@item.valor2.ToString("N0").Replace(',', '.')</td>
+                                        <td>@((item.valor - item.valor2).ToString("N0").Replace(',', '.'))</td>
+                                        <td>@item.porcentaje</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr style="font-weight:bold; font-size:small">
+                                        <td>@item.texto</td>
+                                        <td>@item.valor.ToString("N0").Replace(',', '.')</td>
+                                        <td>@item.valor2.ToString("N0").Replace(',', '.')</td>
+                                        <td>@((item.valor - item.valor2).ToString("N0").Replace(',', '.'))</td>
+                                        <td>@item.porcentaje</td>
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+
+                @*<div class="x_content">
+                    <table class="table table-hover" id="tablaVentas" name="tablaVentas">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Monto</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in ventas)
+                            {
+
+                                if (@item.texto != "TOTAL")
+                                {
+                                <tr>
+                                    <td>@item.texto</td>
+                                    <td>@item.valor.ToString("N0").Replace(',', '.')</td>
+                                    <td>@item.porcentaje</td>
+                                </tr>
+                                }
+                                else
+                                {
+                                <tr style="font-weight:bold; font-size:small">
+                                    <td>@item.texto</td>
+                                    <td>@item.valor.ToString("N0").Replace(',', '.')</td>
+                                    <td>@item.porcentaje</td>
+                                </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                </div>*@
+            </div>
+        </div>
+
+    </div>
+   
+</div>
+
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-xs-12">
+        <div class="clearfix"></div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+
+                    <h3 style="font-weight:bold">FACTURAS POR KAM<small></small></h3>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right text-right">
+                            <a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="table-responsive">
+                        <table class="table table-striped jambo_table bulk_action">
+                            <thead>
+                                <tr class="headings">
+                                    <th class="column-title">KAM</th>
+                                    <th class="column-title">PENDIENTES</th>
+                                    <th class="column-title">APROBADAS</th>
+                                    <th class="column-title">RECHAZADAS</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in facturas_kam)
+                                {
+                                        <tr class="even pointer">
+                                            <td>@item.KAM</td>
+                                            <td>@item.PENDIENTES</td>
+                                            <td>@item.APROBADAS</td>
+                                            <td>@item.RECHAZADAS</td>
+                                        </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        kendo.culture("es-CL");
+        // create DatePicker from input HTML element
+        $("#datepicker").kendoDatePicker();
+
+        $("#monthpicker").kendoDatePicker({
+            // defines the start view
+            start: "year",
+
+            // defines when the calendar should return date
+            depth: "year",
+
+            // display month and year in the input
+            //format: "MMMM yyyy",
+            //format: "MM-yyyy",
+            format: "yyyyMM",
+            maxDate: '0',
+
+            // specifies that DateInput is used for masking the input element
+            dateInput: true,
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+
+        });        
+
+        $("#comboboxClientes").kendoComboBox({
+            //placeholder: "Seleccionar",
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            //dataSource: clientesDS,
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth();
+        var yyyy = today.getFullYear();
+
+        var sumaMes = 1;
+        var fechaActual;
+
+        var documentosDS = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: '@Url.Action("cargarClientesJSON", "TradeMarketing")',
+                    dataType: "json",
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        valor: { type: "string" },
+                        texto: { type: "string" }
+                    }
+                }
+            }
+        });
+
+        
+
+    });
+
+</script>
+
+<script>
+    $(window).load(function(){
+
+        //Clientes
+        @*$("#comboboxClientes").data('kendoComboBox').value("@Request.Params["comboboxClientes"]");*@
+        $("#monthpicker").data('kendoDatePicker').value('@Request.Params["monthpicker"]');
+
+
+    });
+</script>
+

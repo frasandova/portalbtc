@@ -1,0 +1,218 @@
+﻿@{
+    var fecha = WebBiotec.Models.DAO.DaoControlPresupuesto.CargarUltimaFecha();
+    //var userAdmin = User.Identity.Name.ToString().ToLower();
+    var _identity = User.Identity;
+    var userAdmin = WebBiotec.Models.DAO.IdentityExtensions.GetEmailAdress(_identity);
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Retail</title>
+    @Styles.Render("~/Content/dashboardcss")
+    @Styles.Render("~/KendoCss")
+    @Styles.Render("~/Content/AmchartCs")
+    @Styles.Render("~/Content/dataTableCss")
+
+
+    
+    @Scripts.Render("~/Content/jquery")
+    @Scripts.Render("~/KendoJs")
+    @Scripts.Render("~/Content/AmchartJs")
+    @Scripts.Render("~/ComunesJs")
+    @Scripts.Render("~/Content/dataTableJs")
+    
+    <style type="text/css">
+        .content {
+            background-color: #F5F5F5 !important;
+        }
+    </style>
+
+</head>
+<body class="nav-md">
+    <div class="container body">
+        <div class="main_container">
+            <div class="col-md-3 left_col">
+                <div class="left_col scroll-view">
+                    <div class="navbar nav_title" style="border: 0;">
+                        @*<a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>Gentelella Alela!</span></a>*@
+                        <a href="#" class="site_title"><span>Portal Gestión Retail</span></a>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <br />
+
+                    <!-- sidebar menu -->
+                    <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                        <div class="menu_section">
+                            <h3>General</h3>
+                            <ul class="nav side-menu">
+                                <li>
+                                    <a href="@Url.Action("Index", "Inicio", new {monthpicker = @fecha})">
+                                        <i class="fa fa-home"></i>Home<span class="fa fa-chevron-right">
+                                    </span></a>
+                                </li>
+                            </ul>
+                            <ul class="nav side-menu">
+                                <li>
+                                    <a><i class="fa fa-edit"></i> Trade Marketing <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu">
+                                        @*<li><a href="~/TradeMarketing/ControlPresupuesto?comboboxClientes=0&monthpicker = @fecha">Control Presupuesto</a></li>*@
+                                        <li><a href="@Url.Action("ControlPresupuesto", "TradeMarketing")">Control Presupuesto</a></li>
+                                        @*<li><a href="@Url.Action("ControlPresupuesto", "TradeMarketing", new { comboboxClientes = "0", monthpicker = @fecha})">Control Presupuesto</a></li>*@
+                                        
+
+                                        <li><a href="@Url.Action("ControlDocumentos", "TradeMarketing")">Control de Documentos</a></li>
+
+                                        <li><a id="VerProcedimiento" name="VerProcedimiento"href="#">Procedimiento</a></li>
+
+                                        @*<li><a href="~/TradeMarketing/Procedimiento?comboboxClientes=0">Procedimiento</a></li>*@
+                                    </ul>
+                                </li>
+                            </ul>
+                            <ul class="nav side-menu">
+                                <li>
+                                    <a><i class="fa fa-edit"></i> Productos <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu">
+                                        <li><a href="#">Consulta de Stock</a></li>
+                                        <li><a href="#">Fichas Tecnicas</a></li>
+                                        <li><a href="#">Fotografias de Productos</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <ul class="nav side-menu">
+                                <li>
+                                    <a><i class="fa fa-edit"></i> Ventas <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu">
+                                        <li><a href="#">Ventas Mensuales</a></li>
+                                        <li><a href="#">Ventas Diarias</a></li>
+                                        <li><a href="#">Estado de Pedidos</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+
+                            @*@if (userAdmin == "admin@biotec.cl")*@
+                            @if (userAdmin.Substring(0,5) == "admin")
+                            {
+                                <ul class="nav side-menu">
+                                    <li>
+                                        <a><i class="fa fa-edit"></i>Admin <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu">
+                                            <li><a href="@Url.Action("mantEstadoFactura", "TradeMarketing")">Mantenedor Estados Facturas</a></li>
+                                            <li><a href="@Url.Action("Index", "Config_ConceptosRetail")">Mantenedor Cuentas Contables</a></li>
+                                            <li><a href="@Url.Action("Index", "AspNetUsers")">Mantenedor de Usuarios</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                            }
+
+                        </div>
+                     
+
+                    </div>
+                    <!-- /sidebar menu -->
+                    <!-- /menu footer buttons -->
+                    <div class="sidebar-footer hidden-small">
+                        <a data-toggle="tooltip" data-placement="top" title="Settings">
+                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                            <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="Lock">
+                            <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="Logout" href="#">
+                            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                    <!-- /menu footer buttons -->
+                </div>
+            </div>
+
+            <!-- top navigation -->
+            <div class="top_nav">
+                <div class="nav_menu">
+                    <nav>
+                        <div class="nav toggle">
+                            <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+                        </div>
+
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="">
+                                <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    @*<img src="@Url.Content("~/Content/assets/images/img.jpg")" alt="">*@
+                                    @User.Identity.Name
+                                    <span class=" fa fa-angle-down"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-usermenu pull-right">
+                           
+                                    @*<li><a href="#"><i class="fa fa-sign-out pull-right"></i>Salir</a></li>*@
+                                    <li><a href="@Url.Action("ResetPassword", "Account")"><i class="fa fa-sign-out pull-right"></i>Cambiar Password</a></li>
+                                    <li><a href="@Url.Action("LogOff", "Account")"><i class="fa fa-sign-out pull-right"></i>Salir</a></li>
+                                
+                                </ul>
+                            </li>
+                       
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <!-- /top navigation -->
+            <!-- page content -->
+            <div class="right_col" role="main">
+                @RenderBody()
+            </div>
+            <!-- /page content -->
+            <!-- footer content -->
+            <footer>
+                <div class="pull-right">
+                    Biotec SA @*<a href="https://colorlib.com">Colorlib</a>*@
+                </div>
+                <div class="clearfix"></div>
+            </footer>
+            <!-- /footer content -->
+        </div>
+    </div>
+
+ 
+
+</html>
+
+
+@Scripts.Render("~/Content/dashboardjs")
+
+
+<script type="text/javascript">
+	$(document).ready(function()
+	{
+
+	    $("#VerProcedimiento").click(function () {
+	        MostrarProcedimiento();
+	    });
+
+	    function MostrarProcedimiento() {
+
+	        $.ajax({
+	            url: '@Url.Content("~/Content/documentos/Procedimiento/procedimiento.pdf")',
+	            type: 'HEAD',
+	            error: function () {
+	                alert('No existe el documento');
+	            },
+	            success: function () {
+	                window.open('@Url.Content("~/Content/documentos/Procedimiento/procedimiento.pdf")', '_blank');
+	            }
+	        });
+
+
+	    }
+
+	});
+
+
+</script>

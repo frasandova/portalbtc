@@ -1,0 +1,590 @@
+﻿
+@{
+    ViewBag.Title = "ControlDocumentos";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+
+    var user = User.Identity.Name.ToString().ToLower();
+    var canales = WebBiotec.Models.DAO.DaoControlPresupuesto.getCanales(user);
+    var cadenasClientes = WebBiotec.Models.DAO.DaoControlPresupuesto.GetCadenasClientes(@Request.Params["comboboxCanales"], user);
+    var cuentasClientes = WebBiotec.Models.DAO.DaoControlDocumento.getClientesCuentas(@Request.Params["comboboxClientes"]);
+    //var facturas = WebBiotec.Models.DAO.DaoControlDocumento.getFacturas(@Request.Params["comboboxCanales"], @Request.Params["comboboxClientes"]);
+}
+
+<style>
+    #chartdivVentasMM, #chartdivRelacionProvision, #chartdivPresupuestoEjecucion {
+        width: 100%;
+        height: 300px;
+        background-color: rgb(255, 255, 255);
+        overflow: visible;
+        text-align: left;
+    }
+
+    #chartdivRelacionProvision {
+        width: 100%;
+        height: 400px;
+        background-color: rgb(255, 255, 255);
+        overflow: visible;
+        text-align: left;
+    }
+</style>
+
+
+<div class="row x_title">
+    <div class="col-md-6">
+        <h3 style="font-weight:bold">APROBACIÓN DE DOCUMENTOS<small></small></h3>
+    </div>
+
+</div>
+
+
+<div class="panel-group" id="accordion" style="padding-top:10px; padding-bottom:10px;">
+    <div class="panel" style="background-color:#003140;">
+        <div class="panel-heading" style="color:#ffffff;background-color:#3e4855;margin:0px !important">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="">Filtros</a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body" style="color:#ffffff">
+
+                <form class="form-horizontal bordered-row" method="post">
+                    
+                    <div class="row" style="padding-bottom:10px">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+
+                            <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">CANALES:</label>
+                            <div class="col-lg-8 col-md-8 col-sm-12 pull-left">
+                                <select class="form-control" name="comboboxCanales" id="comboboxCanales" style="min-width: 40%">
+                                    <option value="0">SELECCIONAR</option>
+                                    @foreach (var items in canales)
+                                    {
+                                        <option value="@items.valor">@items.texto</option>
+                                    }
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:10px">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">CADENAS CLIENTES:</label>
+                            <div class="col-lg-8 col-md-8 col-sm-12 pull-left">
+                                <select class="form-control" name="comboboxClientes" id="comboboxClientes" style="min-width: 40%">
+                                    <option value="0">SELECCIONAR</option>
+                                    @foreach (var items in cadenasClientes)
+                                    {
+                                        <option value="@items.valor">@items.texto</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:10px">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">N° DE DOCUMENTO:</label>                            
+                            <div class="col-lg-8 col-md-8 col-sm-12"> 
+                                                              
+                                <select class="form-control pull-left col-lg-10 col-md-10 col-sm-12" name="comboboxNumeroDocumento" id="comboboxNumeroDocumento" style="min-width: 40%" required>
+                                    <option value="0">SELECCIONAR</option>
+                                    @*@foreach (var items in facturas)
+            {
+                <option value="@items.numero_factura">@items.numero_factura</option>
+            }
+                                    *@
+                                </select>   
+                                <input type="button" class="btn btn-default col-lg-2 col-md-2 col-sm-12" style="margin-left:5px" id="VerFactura" name="VerFactura" value="Ver Factura">  
+                                                           
+                            </div>
+                            
+
+
+                       </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:10px">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">FECHA FACTURA:</label>
+                            <div class="col-lg-8 col-md-8 col-xs-12">
+                                <input class="k-textbox col-lg-12 col-md-12 col-xs-12" value="" id="txtFechaEmision" name="txtFechaEmision" type="text" style="min-width: 40%"readonly required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:10px">
+                        <div class="col-lg-12 col-md-12 col-xs-12">
+                            <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">MES GASTO:</label>
+                            <div class="col-lg-8 col-md-8 col-xs-12">
+                                <input class="k-textbox col-lg-12 col-md-12 col-xs-12" value="" id="txtFechaGasto" name="txtFechaGasto" type="text" style="min-width: 40%" readonly required />
+                                <input type="button" class="btn btn-default col-lg-2 col-md-2 col-sm-12" style="margin-left:5px" id="btnReMesGasto" name="btnReMesGasto" value="Reclasificar"> 
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:10px" id="divNuevoMesGasto" name="divNuevoMesGasto">                
+                            <div class="col-lg-12 col-md-12 col-xs-12">
+                                <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">NUEVO MES GASTO:</label>
+                                <div class="col-lg-8 col-md-8 col-xs-12">
+                                    @*<input id="monthpicker" name="monthpicker" title="Fecha" style="width: 100%;margin:auto" />*@
+                                    @*<input id="monthpicker" value="November 2011" title="monthpicker" style="width: 100%" />*@
+                                    
+                                        <input id="txtNuevaFechaGasto" name="txtNuevaFechaGasto" value="" title="monthpicker" style="min-width:300px" />
+                                   
+                                    @*<input class="k-textbox col-lg-12 col-md-12 col-xs-12" value="" id="txtNuevaFechaGasto" name="txtNuevaFechaGasto" type="text" style="min-width: 40%" placeholder="Ejemplo: ENERO 2018" />*@
+                                </div>
+                                
+                            </div>
+                    </div>
+
+                        <div class="row" style="padding-bottom:10px">
+                            <div class="col-lg-12 col-md-12 col-xs-12">
+                                <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">CUENTA CONTABLE:</label>
+                                <div class="col-lg-8 col-md-8 col-xs-12">
+                                    <input class="k-textbox col-lg-12 col-md-12 col-xs-12" value="" id="txtCuentaContable" name="txtCuentaContable" type="text" style="min-width: 40%" readonly required />
+                                    <input type="button" class="btn btn-default col-lg-2 col-md-2 col-sm-12" style="margin-left:5px" id="btnReclasificar" name="btnReclasificar" value="Reclasificar">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row" style="padding-bottom:10px" id="divNuevaCuenta" name="divNuevaCuenta">
+                            <div class="col-lg-12 col-md-12 col-xs-12">
+                                <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">NUEVA CUENTA CONTABLE:</label>
+                                <div class="col-lg-8 col-md-8 col-sm-12 pull-left">
+                                    <select class="form-control" name="comboboxCuentaContableNueva" id="comboboxCuentaContableNueva" style="min-width: 40%" required>
+                                        <option value="0">SELECCIONAR</option>
+                                        @foreach (var items in cuentasClientes)
+                                        {
+                                            <option value="@items.VALOR">@items.TEXTO</option>
+                                        }
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding-bottom:30px" id="divComentario" name="divComentario">
+                            <div class="col-lg-12 col-md-12 col-xs-12">
+                                <label class="col-lg-2 col-md-4 col-xs-12 control-label" style="text-align:left;">COMENTARIO:</label>
+                                <div class="col-lg-8 col-md-8 col-xs-12">
+                                    <textarea class="form-control col-lg-12 col-md-12 col-xs-12" rows="5" value="" id="txtComentario" name="txtComentario" style="border-color:black;border:solid; color:black"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12 col-sm-6 pull-left" style="padding-bottom:30px">
+
+                                <div class="col-lg-4 col-md-4 col-xs-12">
+                                    <label><input type="radio" name="engineeFacturaEstado" id="engineAprobar" value="AP"> APROBAR</label>
+                                </div>
+                                @*<div class="col-lg-4 col-md-4 col-xs-12">
+                        <label><input type="radio" name="engineeFacturaEstado" id="engineReclasificar" value="RC"> RECLASIFICAR</label>
+                    </div>*@
+                                <div class="col-lg-4 col-md-4 col-xs-12">
+                                    <label><input type="radio" name="engineeFacturaEstado" id="engineRechazar" value="RE"> RECHAZAR</label>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row" style="padding-bottom:10px">
+                            <div class="col-lg-12 col-md-12 col-xs-12">
+                                <label class="col-lg-4 col-md-4 col-xs-12 control-label" style="text-align:left;"></label>
+                                <div class="col-lg-4 col-md-4 col-xs-12">
+                                    <input type="submit" class="btn btn-default col-lg-3 col-md-3 col-sm-3" id="boton" name="boton" value="Aceptar">
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+</form>
+
+
+            </div>
+        </div>
+    </div>
+    <input id="inputAno" name="inputAno" type="hidden" value="">
+    <input id="inputCarpeta" name="inpuntCarpeta" type="hidden" value="">
+    <input id="inputRut" name="inputRut" type="hidden" value="">
+</div>
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        kendo.culture("es-CL");
+        // create DatePicker from input HTML element
+        //$("#datepicker").kendoDatePicker();
+
+        $("#txtNuevaFechaGasto").kendoDatePicker({
+            // defines the start view
+            start: "year",
+
+            // defines when the calendar should return date
+            depth: "year",
+
+            // display month and year in the input
+            format: "MMMM yyyy",
+
+            // specifies that DateInput is used for masking the input element
+            dateInput: true
+        });
+
+        //$("#monthpicker").kendoDatePicker({
+        //    // defines the start view
+        //    start: "year",
+
+        //    // defines when the calendar should return date
+        //    depth: "year",
+
+        //    // display month and year in the input
+        //    //format: "MMMM yyyy",
+        //    format: "yyyy",
+        //    maxDate: '0',
+
+        //    // specifies that DateInput is used for masking the input element
+        //    dateInput: true,
+        //    animation: {
+        //        close: {
+        //            effects: "zoom:out",
+        //            duration: 300
+        //        }
+        //    }
+
+        //});
+
+        var clientesDS = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: '@Url.Action("cargarClientes", "PortalWeb")',
+                    dataType: "json",
+                    //data: {
+                    //    cod: "ZONASLOCALES",
+                    //    idcanal: canal,
+                    //    idzona: zona,
+                    //    idregion: region,
+                    //    iddistribuidor: distribuidor
+                    //}
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        valor: { type: "string" },
+                        texto: { type: "string" }
+                    }
+                }
+            }
+        });
+
+        $("#comboboxCanales").kendoComboBox({
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+        $("#comboboxClientes").kendoComboBox({
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+        $("#comboboxNumeroDocumento").kendoComboBox({
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+        $("#comboboxCuentaContableNueva").kendoComboBox({
+            clearButton: false,
+            dataValueField: "valor",
+            dataTextField: "texto",
+            animation: {
+                close: {
+                    effects: "zoom:out",
+                    duration: 300
+                }
+            }
+        });
+
+    });
+
+</script>
+
+<script>
+        $(window).load(function () {
+
+            @*var valMes = '@Request.Params["monthpicker"]';
+            if (valMes.length == 0) {
+                valMes = '@ViewBag.fecha';
+            }*@
+
+            var valCanales = '@Request.Params["comboboxCanales"]';
+            if (valCanales.length == 0) {
+                valCanales = '0';
+            }
+            var valClientes = '@Request.Params["comboboxClientes"]';
+            if (valClientes.length == 0) {
+                valClientes = '0';
+            }
+            var valNDocumento = '@Request.Params["comboboxNumeroDocumento"]';
+            if (valNDocumento.length == 0) {
+                valNDocumento = '';
+            }
+
+            var valFechaEmision = '@Request.Params["txtFechaEmision"]';
+            if (valFechaEmision.length == 0) {
+                valFechaEmision = '';
+            }
+            var valFechaGasto = '@Request.Params["txtFechaGasto"]';
+            if (valFechaGasto.length == 0) {
+                valFechaGasto = '';
+            }
+            var valCuenta = '@Request.Params["txtCuentaContable"]';
+            if (valCuenta.length == 0) {
+                valCuenta = '';
+            }
+
+            //$("#comboboxCanales").data('kendoComboBox').value(valCanales);
+            //$("#comboboxClientes").data('kendoComboBox').value(valClientes);
+            //$("#comboboxNumeroDocumento").data('kendoComboBox').value(valNDocumento);
+            //$('#txtFechaEmision').val(valFechaEmision);
+            //$('#txtFechaGasto').val(valFechaGasto);
+            //$('#txtCuentaContable').val(valCuenta);
+            
+
+        });
+</script>
+
+<script type="text/javascript">
+
+   
+    $(document).ready(function () {
+ 
+        $("#divComentario").hide();
+        $("#divNuevaCuenta").hide();
+        $("#divNuevoMesGasto").hide();
+
+        $("#VerFactura").hide();
+            $("#comboboxCanales").change(function () {
+                var valor = $(this).val();
+                //MakeLoadClientes(valor, 'SELECCIONAR');
+                MakeLoadClientes(valor, '@user', 'SELECCIONAR');
+            });
+
+            $("#comboboxClientes").change(function () {
+                var valor = $(this).val();
+                MakeLoadFacturas($("#comboboxCanales").data('kendoComboBox').value(), valor);
+
+            });
+
+            $("#comboboxNumeroDocumento").change(function () {
+                var valor = $(this).val();
+                MakeLoadDetalleFactura($("#comboboxCanales").data('kendoComboBox').value(),
+                    $("#comboboxClientes").data('kendoComboBox').value(), valor);
+
+                if (valor==0) {
+                    $("#VerFactura").hide();
+                } else {
+                    $("#VerFactura").show();
+                }
+
+                LoadCuentasClientes($("#comboboxClientes").data('kendoComboBox').value());
+
+            });
+
+            $("input[name=engineeFacturaEstado]").change(function () {
+    
+                    var valorRadio = $(this).val();
+                    if (valorRadio == 'RE') {
+                        $("#divComentario").show();
+                    } else {
+                        $("#divComentario").hide();
+                    }
+
+                    //if (valorRadio == 'RC') {
+                    //    $("#divNuevaCuenta").show();
+                    //} else {
+                    //    $("#divNuevaCuenta").hide();
+                    //}
+            });
+
+           
+        });
+
+</script>
+
+<script type="text/javascript">
+	$(document).ready(function()
+	{
+
+	    function MostrarFactura(ANO, CARPETA, RUT, FACTURA) {
+
+	        $.ajax({
+	            url: '@Url.Content("~/Content/documentos/facturas/")' + ANO + "/" + CARPETA + '/' + RUT + "_" + FACTURA + '.pdf',
+	            type: 'HEAD',
+	            error: function () {
+	                alert('No existe el documento');
+	            },
+	            success: function () {
+	                window.open('@Url.Content("~/Content/documentos/facturas/")' + ANO + "/" + CARPETA + '/' + RUT + "_" + FACTURA + '.pdf', '_blank');
+	            }
+	        });
+
+
+	    }
+
+	    $("#VerFactura").click(function () {
+	        var valAno = $('#inputAno').val();
+	        var valCarpeta = $('#inputCarpeta').val();
+	        var valRut = $('#inputRut').val();
+	        var valfactura = $("#comboboxNumeroDocumento").data('kendoComboBox').value();
+	        MostrarFactura(valAno, valCarpeta, valRut, valfactura);
+	    });
+
+	    $("#btnReclasificar").click(function () {
+
+	        if ($("#divNuevaCuenta").is(':visible')) {
+	            //$("#divNuevaCuenta").hide();
+	            $('#btnReclasificar input').val("Reclasificar");
+	        } else {
+	            $("#divNuevaCuenta").show();
+	            $('#btnReclasificar input').val("Reclasificar");
+	        }
+
+
+	        //if ($("#divNuevaCuenta").show()) {
+	        //    $("#divNuevaCuenta").hide();
+	        //} else {
+	        //    $("#divNuevaCuenta").show();
+	        //}
+
+	        //if (valorRadio == 'RC') {
+	        //    $("#divNuevaCuenta").show();
+	        //} else {
+	        //    $("#divNuevaCuenta").hide();
+	        //}
+	        //var valAno = $('#inputAno').val();
+	        //var valCarpeta = $('#inputCarpeta').val();
+	        //var valRut = $('#inputRut').val();
+	        //var valfactura = $("#comboboxNumeroDocumento").data('kendoComboBox').value();
+	        //MostrarFactura(valAno, valCarpeta, valRut, valfactura);
+	    });
+
+	    $("#btnReMesGasto").click(function () {
+
+	        if ($("#divNuevoMesGasto").is(':visible')) {
+	            //$('#btnReMesGasto input').val("Reclasificar");
+	        } else {
+	            $("#divNuevoMesGasto").show();
+	            //$('#btnReMesGasto input').val("Reclasificar");
+	        }
+	    });
+
+	    
+
+	    $("#boton").click(function () {
+	        var validacion = "false"; //string
+	        var canal = $("#comboboxCanales").data('kendoComboBox').value();
+	        var cliente = $("#comboboxClientes").data('kendoComboBox').value();
+	        var factura = $("#comboboxNumeroDocumento").data('kendoComboBox').value();
+	        var estado = $('input:radio[name=engineeFacturaEstado]:checked').val();
+	        var nuevaCuenta = $("#comboboxCuentaContableNueva").data('kendoComboBox').value();
+	        var glosa = $('#txtComentario').val();
+	        //alert('1');
+	        //alert(canal);
+	        //alert(cliente);
+	        //alert(factura);
+	        //alert(glosa);
+
+	        if (canal == 0) {
+	            alert('Debe seleccionar un canal');
+	            return false;
+	        }
+	        if (cliente == 0) {
+	            alert('Debe seleccionar un cliente');
+	            return false;
+	        }
+	        if (factura == null || estado == 'undefined') {
+	            alert('Debe seleccionar una factura a');
+	            return false;
+	        }
+
+	        if (estado == null || estado == 'undefined') {
+	            alert('Debe seleccionar una acción para la factura');
+	            return false;
+	        } else {
+	            if (glosa == null || glosa.trim() == '' && estado == 'RE') {
+	                alert('Para rechazar la factura debe ingresar un motivo en el comentario');
+	                return false;
+	            }
+	            if (nuevaCuenta == null || nuevaCuenta == '0' && estado == 'RC') {
+	                alert('Para reclasificar debe seleccionar la nueva cuenta contable');
+	                return false;
+	            }
+	        }
+	        
+	        var mensajeestado = '';;
+	        if (estado == 'AP') {
+	            mensajeestado = ' Aprobada';
+	        } else if (estado == 'RE') {
+	            mensajeestado = ' Rechazada';
+	        } else if (estado == 'RC') {
+	            mensajeestado = ' Reclasificada';
+	        }
+
+	        alert('Proceso exitoso, Factura: ' + factura + mensajeestado);
+	        //alert('Factura: ' + factura + $("input[name='engineeFacturaEstado']:checked").parent('label').text());
+
+	        //validacion = true;
+	        //if (validacion) {
+	        //    alert('entro');
+	        //    var oldData = $("#comboboxNumeroDocumento").data('kendoComboBox').dataSource.data();
+	        //    var tamanocomboboxFacturas = oldData.length;
+	        //    alert(tamanocomboboxFacturas);
+	        //    console.log(oldData);
+	        //    while (tamanocomboboxFacturas > 0) {
+	        //        for (var i = 0; i < oldData.length; i++) {
+	        //            $("#comboboxNumeroDocumento").data('kendoComboBox').dataSource.remove(oldData[i]);
+	        //        }
+	        //        oldData = $("#comboboxNumeroDocumento").data('kendoComboBox').dataSource.data();
+	        //        tamanocomboboxFacturas = oldData.length;
+	        //    }
+	        //} else {
+	        //    alert('No entro');
+	        //}
+
+		    //alert($('input:radio[name=engineeFacturaEstado]:checked').val());
+
+		    //alert($('input:radio[name=engineeFacturaEstado]:checked').val());
+			//$("#formulario").submit();
+			});
+		 });
+</script>

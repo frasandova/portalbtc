@@ -1,0 +1,151 @@
+﻿@model WebBiotec.Models.Config_ConceptosRetail
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+}
+
+<h2>Crear Cuenta Contable</h2>
+
+@*@using (Html.BeginForm())*@
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formcreate" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @*<h4>Config_ConceptosRetail</h4>*@
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.RUT, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.EditorFor(model => model.RUT, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.RUT, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FICHA, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.EditorFor(model => model.FICHA, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.FICHA, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.COD_CONCEPTO, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.DropDownList("COD_CONCEPTO", (IEnumerable<SelectListItem>)ViewBag.CuentasContables, new { @class = "k-input form-control" })
+                @Html.ValidationMessageFor(model => model.COD_CONCEPTO, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        @*<div class="form-group">
+            @Html.LabelFor(model => model.COD_CONCEPTO, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.EditorFor(model => model.COD_CONCEPTO, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.COD_CONCEPTO, "", new { @class = "text-danger" })
+            </div>
+        </div>*@
+
+        <div class="form-group" id="HIDE_CONCEPTO" name="HIDE_CONCEPTO">
+            @Html.LabelFor(model => model.CONCEPTO, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.EditorFor(model => model.CONCEPTO, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CONCEPTO, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+         <div class="form-group" id="HIDE_CONCEPTO" name="HIDE_CONCEPTO">
+            @Html.LabelFor(model => model.COD_CUENTA, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.EditorFor(model => model.COD_CUENTA, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.COD_CUENTA, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PORCENTAJE, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.EditorFor(model => model.PORCENTAJE, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.PORCENTAJE, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.TIPO_CALCULO, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.DropDownList("TIPO_CALCULO", new List<SelectListItem>{
+                new SelectListItem {Text="%",Value = "%" },
+                new SelectListItem {Text="UF",Value = "UF" }
+                }, new { @class = "k-input form-control" })
+                @*@Html.ValidationMessageFor(model => model.COD_CONCEPTO, "", new { @class = "text-danger" })*@
+                @Html.ValidationMessageFor(model => model.TIPO_CALCULO, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        @*<div class="form-group">
+            @Html.LabelFor(model => model.TIPO_CALCULO, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-4">
+                @Html.EditorFor(model => model.TIPO_CALCULO, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.TIPO_CALCULO, "", new { @class = "text-danger" })
+            </div>
+        </div>*@
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <a href="@Url.Action("Index", "Config_ConceptosRetail", new { comboboxCanales = @Request.Params["comboboxCanales"], comboboxClientes = @Request.Params["comboboxClientes"] })" class="btn btn-default">Volver</a>
+                <input type="submit" value="Crear" class="btn btn-default" id="CREAR" />
+            </div>
+        </div>
+
+        @*<div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <a href="@Url.Action("Index", "AspNetUsers")" class="btn btn-default">Volver</a>
+                <input type="submit" class="btn btn-default" value="Crear" />
+            </div>
+        </div>*@
+    </div>
+}
+
+@*<div>
+    @Html.ActionLink("Volver", "Index", new { comboboxCanales = @Request.Params["comboboxCanales"], comboboxClientes = @Request.Params["comboboxClientes"] })
+</div>*@
+
+
+<script>
+
+
+    //$("#formcreate").on('submit', function (evt) {
+    //    var valor = $("#COD_CONCEPTO option:selected").text()
+    //    alert(valor);
+    //    alert('SELECCIONAR1');
+    //    if (VALOR == 'SELECCIONAR') {
+    //        alert('SELECCIONAR2');
+    //        evt.preventDefault();
+    //    }
+
+    //});
+
+
+
+    $("#COD_CONCEPTO").change(function () {
+
+        var valor = $("#COD_CONCEPTO option:selected").text()
+        valor = valor.substring(valor.indexOf(" ") + 1);
+        $("#CONCEPTO").val(valor);
+
+    });
+    $(document).ready(function () {
+
+        $('#HIDE_CONCEPTO').hide();
+
+    });
+
+    $(document).ready(function () {
+
+        var valor = $("#COD_CONCEPTO option:selected").text()
+        valor = valor.substring(valor.indexOf(" ") + 1);
+        $("#CONCEPTO").val(valor);
+    });
+
+
+</script>

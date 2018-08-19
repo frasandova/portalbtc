@@ -1,0 +1,60 @@
+﻿
+@{
+    ViewBag.Title = "DeleteEstadoFactura";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+}
+
+<h2>Detalle Factura</h2>
+
+<div>
+    @*<h4>Factura</h4>*@
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+           RUT:
+        </dt>
+
+        <dd>
+            @ViewBag.RUT
+        </dd>
+
+        <dt>
+            FACTURA:
+        </dt>
+
+        <dd>
+            @ViewBag.N_FACTURA
+        </dd>
+
+        <dt>
+            MES:
+        </dt>
+
+        <dd>
+            @ViewBag.FECHA_EMISION
+        </dd>
+
+        <dt>
+            FECHA_GASTO:
+        </dt>
+
+        <dd>
+            @ViewBag.FECHA_GASTO
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Eliminar" class="btn btn-default" />
+
+            <a class="btn btn-default" href="~/TradeMarketing/mantEstadoFactura?monthpicker=@ViewBag.monthpicker&monthpickerfin=@ViewBag.monthpickerfin&comboboxCanales=@Request.Params["comboboxCanales"]&comboboxClientes=@Request.Params["comboboxClientes"]">Volver</a>
+            @*@Html.ActionLink("VOLVER", "mantEstadoFactura", "TradeMarketing", new { @monthpicker= ViewBag.monthpicker, @monthpickerfin = ViewBag.monthpickerfin, @comboboxCanales = Request.Params["comboboxCanales"] , @comboboxClientes = Request.Params["comboboxClientes"] })*@
+
+         
+        </div>
+    }
+</div>
